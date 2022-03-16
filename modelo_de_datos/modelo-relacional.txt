@@ -3,8 +3,12 @@ ESQUEMA RELACIONAL
 Dominios:
 
 Esquemas de relacion:
-   Usuario = (Nombre_de_usuario: VARCHAR, clave primaria; Correo_electronico: VARCHAR, NO NULO; 
-              Contrasena: VARCHAR, NO NULO; Pais: VARCHAR, NO NULO; 
+   Usuario = (Nombre_de_usuario: VARCHAR, clave primaria; Correo_electrónico: VARCHAR, NO NULO; 
+              Contraseña: VARCHAR, NO NULO; Pais: VARCHAR, NO NULO; 
               Puntos: ENTERO, NO NULO; Conectado: BOOLEANO, NO NULO);
-              clave ajena (Usuario_Nombre_de_usuario) referencia a Usuario(Nombre_de_usuario)
+
+   Amigo = (Usuario_Nombre_de_usuario: VARCHAR; Usuario_Nombre_de_usuario: VARCHAR);
+            clave primaria (Usuario_Nombre_de_usuario,Usuario_Nombre_de_usuario);
+            clave ajena (Usuario_Nombre_de_usuario) referencia a Usuario(Nombre_de_usuario)
+            clave ajena (Usuario_Nombre_de_usuario) referencia a Usuario(Nombre_de_usuario)
 
