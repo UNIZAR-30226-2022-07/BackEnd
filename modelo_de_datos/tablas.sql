@@ -1,19 +1,27 @@
 CREATE TABLE Usuario
 (
    Nombre_de_usuario    CHAR(50) PRIMARY KEY,
-   Correo_electronico   CHAR(100)        NOT NULL,
-   Contrasena           CHAR(40)        NOT NULL,
-   Pais                 CHAR(50)        NOT NULL,
+   Correo_electronico   CHAR(60)        NOT NULL,
+   Contrasena           CHAR(30)        NOT NULL,
+   Pais                 CHAR(70)        NOT NULL,
    Puntos               NUMBER        NOT NULL,
-   Conectado            BOOLEAN        NOT NULL
+   Ultima_partida       NUMBER        NOT NULL
+);
+
+CREATE TABLE Notificaciones
+(
+   valor                       CHAR(200), -- autoincrementado
+   Usuario_Nombre_de_usuario   CHAR(50),
+   PRIMARY KEY (valor,Usuario_Nombre_de_usuario),
+   FOREIGN KEY (Usuario_Nombre_de_usuario) REFERENCES Usuario(Nombre_de_usuario)
 );
 
 CREATE TABLE Amigo
 (
-   Usuario_Nombre_de_usuario   CHAR(50),
-   Usuario_Nombre_de_usuario   CHAR(50),
-   PRIMARY KEY (Usuario_Nombre_de_usuario,Usuario_Nombre_de_usuario),
-   FOREIGN KEY (Usuario_Nombre_de_usuario) REFERENCES Usuario(Nombre_de_usuario),
-   FOREIGN KEY (Usuario_Nombre_de_usuario) REFERENCES Usuario(Nombre_de_usuario)
+   Usuario   CHAR(50),
+   Usuario2   CHAR(50),
+   PRIMARY KEY (Usuario,Usuario2),
+   FOREIGN KEY (Usuario) REFERENCES Usuario(Nombre_de_usuario),
+   FOREIGN KEY (Usuario2) REFERENCES Usuario(Nombre_de_usuario)
 );
 
