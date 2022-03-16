@@ -11,9 +11,9 @@ CREATE TABLE Usuario
 CREATE TABLE Notificaciones
 (
    valor                       CHAR(200), -- autoincrementado
-   Usuario_Nombre_de_usuario   CHAR(50),
-   PRIMARY KEY (valor,Usuario_Nombre_de_usuario),
-   FOREIGN KEY (Usuario_Nombre_de_usuario) REFERENCES Usuario(Nombre_de_usuario)
+   Usuario   CHAR(50),
+   PRIMARY KEY (valor,Usuario),
+   FOREIGN KEY (Usuario) REFERENCES Usuario(Nombre_de_usuario)
 );
 
 CREATE TABLE Amigo
