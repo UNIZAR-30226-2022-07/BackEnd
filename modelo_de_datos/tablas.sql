@@ -4,8 +4,8 @@ CREATE TABLE Usuario
    Correo_electronico   CHAR(60)        NOT NULL,
    Contrasena           CHAR(30)        NOT NULL,
    Pais                 CHAR(70)        NOT NULL,
-   Puntos               NUMBER        NOT NULL,
-   Ultima_partida       NUMBER        NOT NULL
+   Puntos               INTEGER        NOT NULL,
+   Ultima_partida       INTEGER        NOT NULL
 );
 
 CREATE TABLE Notificaciones
