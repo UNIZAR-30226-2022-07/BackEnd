@@ -1,3 +1,9 @@
+DROP TABLE IF EXISTS Amigo;
+DROP TABLE IF EXISTS Notificaciones;
+DROP TABLE IF EXISTS Usuario;
+DROP DATABASE IF EXISTS modelo_datos;
+
+CREATE DATABASE modelo_datos;
 CREATE TABLE Usuario
 (
    Nombre_de_usuario    CHAR(50) PRIMARY KEY,
