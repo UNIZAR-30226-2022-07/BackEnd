@@ -1,0 +1,10 @@
+ESQUEMA RELACIONAL
+
+Dominios:
+
+Esquemas de relacion:
+   Usuario = (Nombre_de_usuario: VARCHAR, clave primaria; Correo_electronico: VARCHAR, NO NULO; 
+              Contrasena: VARCHAR, NO NULO; Pais: VARCHAR, NO NULO; 
+              Puntos: ENTERO, NO NULO; Conectado: BOOLEANO, NO NULO);
+              clave ajena (Usuario_Nombre_de_usuario) referencia a Usuario(Nombre_de_usuario)
+
