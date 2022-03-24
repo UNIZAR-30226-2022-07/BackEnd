@@ -2,32 +2,24 @@ package com.bezkoder.spring.security.postgresql.models;
 
 import javax.persistence.*;
 
-import java.util.HashSet;
-import java.util.Set;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 
 @Entity
 @Table(name = "Usuario", 
             uniqueConstraints = { 
-                @UniqueConstraint(columnNames = "username"),
-                @UniqueConstraint(columnNames = "email") 
+                @UniqueConstraint(columnNames = "Nombre_de_usuario"),
+                @UniqueConstraint(columnNames = "Correo_electronico") 
             })
 public class Usuario {
 
         @Id
         @Size(max = 60)
-        @Email
+        @Pattern(regexp = ".+[@].+[\\.].+")
         private String email;
-    //    @GeneratedValue(strategy = GenerationType.IDENTITY)
-     //   private Long id;
-    //    @NotBlank
-    //    @Size(max = 20)
-        @NotBlank
+        @NotNull
         @Size(max = 50)
         private String username;
-        @NotBlank
+        @NotNull
         @Size(max = 30)
         private String password;
 //        @ManyToMany(fetch = FetchType.LAZY)
@@ -35,12 +27,12 @@ public class Usuario {
  //                   joinColumns = @JoinColumn(name = "user_id"), 
  //                   inverseJoinColumns = @JoinColumn(name = "role_id"))
     //    private Set<Role> roles = new HashSet<>();
-        @NotBlank
+        @NotNull
         @Size(max = 70)
         private String pais;
-        @NotBlank
+        @NotNull
         private int puntos;
-        @NotBlank
+        @NotNull
         private int ultimaPartida;
         public Usuario() {
         }
@@ -84,7 +76,7 @@ public class Usuario {
             this.puntos = puntos;
         }
         public int getUltimaPartida() {
-            return puntos;
+            return this.ultimaPartida;
         }
         public void setUltimaPartida(int ultimaPartida) {
             this.ultimaPartida = ultimaPartida;
