@@ -13,11 +13,17 @@ public class Amigo {
     @Id
     @Size(max = 50)
     @Pattern(regexp = ".+[@].+[\\.].+")
-	private Usuario usuario;
-    @Id
+    @ManyToOne()
+    @JoinColumn(name = "Usuario")
+    private Usuario usuario;
+
     @Size(max = 50)
     @Pattern(regexp = ".+[@].+[\\.].+")
+    @ManyToOne()
+    @JoinColumn(name = "Usuario2")
 	private Usuario usuario2;
+
+    
 	
 	public Amigo() {
 	}

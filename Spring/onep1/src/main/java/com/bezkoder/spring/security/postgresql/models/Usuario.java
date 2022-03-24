@@ -1,5 +1,8 @@
 package com.bezkoder.spring.security.postgresql.models;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.persistence.*;
 
 import javax.validation.constraints.*;
@@ -27,6 +30,10 @@ public class Usuario {
  //                   joinColumns = @JoinColumn(name = "user_id"), 
  //                   inverseJoinColumns = @JoinColumn(name = "role_id"))
     //    private Set<Role> roles = new HashSet<>();
+
+    @OneToMany(mappedBy = "usuario")
+    private List<Amigo> amigos = new ArrayList<Amigo>();
+
         @NotNull
         @Size(max = 70)
         private String pais;

@@ -4,16 +4,7 @@ CREATE TABLE Usuario
    Correo_electronico   CHAR(60)        PRIMARY KEY,
    Contrasena           CHAR(30)        NOT NULL,
    Pais                 CHAR(70)        NOT NULL,
-   Puntos               INTEGER        NOT NULL,
-   Ultima_partida       INTEGER        NOT NULL
-);
-
-CREATE TABLE Notificaciones
-(
-   valor                       CHAR(200), -- autoincrementado
-   Usuario   CHAR(50),
-   PRIMARY KEY (valor,Usuario),
-   FOREIGN KEY (Usuario) REFERENCES Usuario(Correo_electronico)
+   Puntos               INTEGER        NOT NULL
 );
 
 CREATE TABLE Amigo
