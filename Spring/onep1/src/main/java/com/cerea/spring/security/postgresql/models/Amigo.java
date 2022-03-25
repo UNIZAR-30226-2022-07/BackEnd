@@ -1,4 +1,4 @@
-package com.onep1.spring.security.postgresql.models;
+package com.cerea.spring.security.postgresql.models;
 
 import javax.persistence.*;
 

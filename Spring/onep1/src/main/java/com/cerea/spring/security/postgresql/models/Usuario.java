@@ -1,4 +1,4 @@
-package com.onep1.spring.security.postgresql.models;
+package com.cerea.spring.security.postgresql.models;
 
 import java.util.ArrayList;
 import java.util.List;
