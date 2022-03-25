@@ -1,4 +1,4 @@
-package com.onep1.onep1;
+package com.onep1.spring;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
