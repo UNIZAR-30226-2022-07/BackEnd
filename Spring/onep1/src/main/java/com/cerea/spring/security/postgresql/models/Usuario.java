@@ -2,29 +2,32 @@ package com.cerea.spring.security.postgresql.models;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Collection;
 
 import javax.persistence.*;
-
 import javax.validation.constraints.*;
+
+import  org.springframework.security.core.GrantedAuthority;
+import  org.springframework.security.core.userdetails.UserDetails;
 
 @Entity
 @Table(name = "Usuario", 
             uniqueConstraints = { 
                 @UniqueConstraint(columnNames = "nombre_de_usuario"),
-                @UniqueConstraint(columnNames = "correo_electronico") 
+                @UniqueConstraint(columnNames = "correo_electronico")
             })
-public class Usuario {
+public class Usuario implements UserDetails {
 
     @Id
-    @Size(max = 60)
     @Pattern(regexp = ".+[@].+[\\.].+")
+    @Column(name = "correo_electronico", nullable = false, length = 60)
     private String email;
 
-    @Size(max = 50)
+    @Column(name = "nombre_de_usuario", nullable = false, length = 50)
     private String username;
     
     @NotNull
-    @Size(max = 30)
+    @Column(name="contrasena", nullable = false, length = 30)
     private String password;
     
     @NotNull
@@ -32,10 +35,11 @@ public class Usuario {
     private List<Amigo> amigos = new ArrayList<Amigo>();
 
     @NotNull
-    @Size(max = 70)
+    @Column(name="pais", nullable = false, length = 70)
     private String pais;
 
     @NotNull
+    @Column(name="pais", nullable = false)
     private int puntos;
 
     public Usuario(String username, String email, String password, String pais) {
@@ -84,5 +88,30 @@ public class Usuario {
         
     public void setPuntos(int puntos) {
         this.puntos = puntos;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return null;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 }
