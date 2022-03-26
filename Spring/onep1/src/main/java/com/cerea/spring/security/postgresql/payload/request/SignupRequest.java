@@ -3,20 +3,21 @@ package com.cerea.spring.security.postgresql.payload.request;
 import javax.validation.constraints.*;
  
 public class SignupRequest {
-    @NotBlank
+    @NotNull
     @Size(min = 3, max = 50)
     private String username;
  
-    @NotBlank
+    @NotNull
     @Size(max = 60)
-    @Email
+ //   @Email
+    @Pattern(regexp = ".+[@].+[\\.].+")
     private String email;
     
-    @NotBlank
+    @NotNull
     @Size(min = 6, max = 30)
     private String password;
 
-    @NotBlank
+    @NotNull
     @Size(min = 3, max = 70)
     private String pais;
   

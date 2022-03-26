@@ -1,12 +1,12 @@
 package com.cerea.spring.security.postgresql.payload.request;
 
-import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.*;
 
 public class LoginRequest {
-	@NotBlank
+	@NotNull
 	private String username;
 
-	@NotBlank
+	@NotNull
 	private String password;
 
 	public String getUsername() {
