@@ -8,6 +8,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import com.cerea.spring.security.postgresql.models.Usuario;
+import com.cerea.spring.security.postgresql.models.Amigo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class UserDetailsImpl implements UserDetails {
@@ -16,19 +17,21 @@ public class UserDetailsImpl implements UserDetails {
 	private String email;
     private String pais;
     private int puntos;
+	private List<Amigo> amigos;
 	
     @JsonIgnore
     private String password;
 
     private Collection<? extends GrantedAuthority> authorities;
 
-    public UserDetailsImpl(String username, String email, String password, String pais, int puntos, Collection<? extends GrantedAuthority> authorities) {
+    public UserDetailsImpl(String username, String email, String password, String pais, int puntos, List<Amigo> amiguis, Collection<? extends GrantedAuthority> authorities) {
 
         this.username = username;
         this.email = email;
         this.password = password;
         this.pais = pais;
         this.puntos = puntos;
+		this.amigos = amiguis;
         this.authorities = authorities;
 
     }
@@ -54,6 +57,10 @@ public class UserDetailsImpl implements UserDetails {
 		return puntos;
 	}
     
+	public List<Amigo> getAmigos() {
+		return amigos;
+	}
+
 	@Override
 	public String getPassword() {
 		return password;
