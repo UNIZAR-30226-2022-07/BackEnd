@@ -39,7 +39,7 @@ public class Usuario {
     private String pais;
 
 //    @NotNull
-    @Column(name="pais", nullable = false)
+    @Column(name="puntos", nullable = false)
     private int puntos;
 
     public Usuario(String username, String email, String password, String pais) {
