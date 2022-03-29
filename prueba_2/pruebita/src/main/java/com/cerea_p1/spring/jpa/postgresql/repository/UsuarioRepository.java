@@ -1,4 +1,5 @@
 package com.cerea_p1.spring.jpa.postgresql.repository;
+
 import java.util.Optional;
 import com.cerea_p1.spring.jpa.postgresql.model.Usuario;
 

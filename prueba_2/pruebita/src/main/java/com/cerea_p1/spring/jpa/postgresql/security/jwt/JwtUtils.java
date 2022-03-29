@@ -8,13 +8,18 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 import com.cerea_p1.spring.jpa.postgresql.security.services.UserDetailsImpl;
 import io.jsonwebtoken.*;
+
 @Component
 public class JwtUtils {
+
   private static final Logger logger = LoggerFactory.getLogger(JwtUtils.class);
-  @Value("${bezkoder.app.jwtSecret}")
+
+  @Value("${onep1.app.jwtSecret}")
   private String jwtSecret;
-  @Value("${bezkoder.app.jwtExpirationMs}")
+
+  @Value("${onep1.app.expirationMs}")
   private int jwtExpirationMs;
+
   public String generateJwtToken(Authentication authentication) {
     UserDetailsImpl userPrincipal = (UserDetailsImpl) authentication.getPrincipal();
     return Jwts.builder().setSubject((userPrincipal.getUsername())).setIssuedAt(new Date())
