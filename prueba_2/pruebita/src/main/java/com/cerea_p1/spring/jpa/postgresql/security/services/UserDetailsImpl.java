@@ -36,6 +36,7 @@ public class UserDetailsImpl implements UserDetails {
 				user.getEmail(),
 				user.getPassword(),
                 user.getPais(), user.getPuntos(),user.getAmigos());
+
 	}
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -58,7 +59,6 @@ public class UserDetailsImpl implements UserDetails {
 	public String getUsername() {
 		return username;
 	}
-
 	public List<Usuario> getAmigos(){
 		return this.amigos;
 	}
