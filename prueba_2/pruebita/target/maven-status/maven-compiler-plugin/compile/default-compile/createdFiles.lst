@@ -1,0 +1,10 @@
+com/cerea_p1/spring/jpa/postgresql/security/services/UserDetailsImpl.class
+com/cerea_p1/spring/jpa/postgresql/repository/UsuarioRepository.class
+com/cerea_p1/spring/jpa/postgresql/payload/request/SignupRequest.class
+com/cerea_p1/spring/jpa/postgresql/payload/request/LoginRequest.class
+com/cerea_p1/spring/jpa/postgresql/Onep12Application.class
+com/cerea_p1/spring/jpa/postgresql/payload/response/JwtResponse.class
+com/cerea_p1/spring/jpa/postgresql/controller/AuthController.class
+com/cerea_p1/spring/jpa/postgresql/payload/response/MessageResponse.class
+com/cerea_p1/spring/jpa/postgresql/security/jwt/AuthEntryPointJwt.class
+com/cerea_p1/spring/jpa/postgresql/model/Usuario.class
