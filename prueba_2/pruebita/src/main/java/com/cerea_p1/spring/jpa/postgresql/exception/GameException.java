@@ -1,8 +1,4 @@
-package ex.com.challenge.exception;
-
-/**
- * @author Ehsan Sh
- */
+package com.cerea_p1.spring.jpa.postgresql.exception;
 
 public class GameException extends RuntimeException {
 

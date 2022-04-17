@@ -45,12 +45,12 @@ public class GameController {
         return ResponseEntity.ok(gameService.connectToRandomGame(player));
     }*/
 
-    @PostMapping("/sow")
+  /*  @PostMapping("/sow")
     public ResponseEntity<Partida> sow(@RequestBody Sow sow) throws GameException {
         logger.info("sow: {}", sow);
         Partida game = gameService.sow(sow);
 
         simpMessagingTemplate.convertAndSend("/topic/game-progress/" + game.getId(), game);
         return ResponseEntity.ok(game);
-    }
+    }*/
 }

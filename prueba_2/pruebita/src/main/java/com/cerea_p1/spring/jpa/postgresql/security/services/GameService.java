@@ -1,7 +1,7 @@
 package com.cerea_p1.spring.jpa.postgresql.security.services;
 
 import com.cerea_p1.spring.jpa.postgresql.model.game.*;
-//import ex.com.challenge.exception.GameException;
+import com.cerea_p1.spring.jpa.postgresql.exception.*;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -30,23 +30,21 @@ public class GameService {
         return game;
     }
 
-    /* public Game connectToGame(Player player, String gameId) {
-        Optional<Game> optionalGame=gameRepository.findById(gameId);
+    public Partida connectToGame(Jugador player, String gameId) {
+        //if(!almacen_partidas.contains(gameId))
+        Optional<Partida> optionalGame = Optional.of(almacen_partidas.get(gameId));
 
-        optionalGame.orElseThrow(() ->new GameException("Game with provided id doesn't exist"));
-        Game game = optionalGame.get();
+        optionalGame.orElseThrow(() -> new GameException("Game with provided id doesn't exist"));
+        Partida game = optionalGame.get();
 
-        if (game.getSecondPlayer() != null) {
-            throw new GameException("Game is not valid anymore");
-        }
+        game.addJugador(player);
 
-        game.setSecondPlayer(player);
-        game.setStatus(GameStatusEnum.IN_PROGRESS);
-        gameRepository.save(game);
+        game.setEstado(EstadoPartidaEnum.IN_PROGRESS);
+        almacen_partidas.put(gameId,game);
         return game;
     }
 
-    public Game connectToRandomGame(Player player) {
+    /*public Game connectToRandomGame(Player player) {
         Optional<Game> optionalGame = gameRepository.findFirstByStatusAndSecondPlayerIsNull(GameStatusEnum.NEW);
         optionalGame.orElseThrow(() ->new GameException("There is no available Game!"));
         Game game = optionalGame.get();
