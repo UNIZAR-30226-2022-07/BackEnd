@@ -28,7 +28,7 @@ public class GameService {
     public Partida crearPartida(Jugador jugador) {
         Partida game = new Partida(true);
         game.setId(UUID.randomUUID().toString());
-        game.addJugador(jugador);;
+        game.addJugador(jugador);
         game.setEstado(EstadoPartidaEnum.NEW);
         almacen_partidas.put(game.getId(),game);
         return game;
@@ -36,12 +36,16 @@ public class GameService {
 
     public Partida connectToGame(Jugador player, String gameId) {
         //if(!almacen_partidas.contains(gameId))
-        Optional<Partida> optionalGame = Optional.of(almacen_partidas.get(gameId));
+        Optional<Partida> optionalGame;
+        if(almacen_partidas.containsKey(gameId))
+         optionalGame = Optional.of(almacen_partidas.get(gameId));
+        else{ optionalGame = null; throw new GameException("Esa partida no existe"); 
+        }
 
         optionalGame.orElseThrow(() -> new GameException("Game with provided id doesn't exist"));
         Partida game = optionalGame.get();
 
-        game.addJugador(player);
+        game.addJugador(player); 
 
         game.setEstado(EstadoPartidaEnum.IN_PROGRESS);
         almacen_partidas.put(gameId,game);
