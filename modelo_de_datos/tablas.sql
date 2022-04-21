@@ -16,3 +16,12 @@ CREATE TABLE Amigo
    FOREIGN KEY (usuario2) REFERENCES Usuario(nombre_de_usuario)
 );
 
+CREATE TABLE Invitacion
+(
+   usuario1             VARCHAR(255),
+   usuario2             VARCHAR(255),
+   PRIMARY KEY (usuario1,usuario2),
+   FOREIGN KEY (usuario1) REFERENCES Usuario(nombre_de_usuario),
+   FOREIGN KEY (usuario2) REFERENCES Usuario(nombre_de_usuario)
+)
+
