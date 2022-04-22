@@ -1,4 +1,4 @@
-package com.cerea_p1.spring.jpa.postgresql.payload.request;
+package com.cerea_p1.spring.jpa.postgresql.payload.request.friends;
 
 import javax.validation.constraints.NotBlank;
 
@@ -12,10 +12,6 @@ public class AddFriendRequest {
 
     public String getUsername() {
 		return username;
-	}
-
-	public void setUsername(String username) {
-		this.username = username;
 	}
 
     public String getFriendname(){

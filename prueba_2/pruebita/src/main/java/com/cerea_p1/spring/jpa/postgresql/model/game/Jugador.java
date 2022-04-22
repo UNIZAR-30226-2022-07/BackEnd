@@ -35,4 +35,12 @@ public class Jugador {
         }
         return false;
     }
+
+    public boolean equals(Object o){
+        if (!(o instanceof Jugador)){ 
+            return false;
+        }
+        Jugador j = (Jugador)o;
+        return Objects.equals(j.getNombre(), this.nombre);
+    }
 }
