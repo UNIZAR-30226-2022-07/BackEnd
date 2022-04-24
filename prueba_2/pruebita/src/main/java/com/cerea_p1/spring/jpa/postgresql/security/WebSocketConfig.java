@@ -10,7 +10,6 @@ import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
 
 
 @Configuration
-//@EnableWebSocketMessageBroker
 @EnableWebSocketMessageBroker
 @Deprecated
 public class WebSocketConfig extends AbstractSecurityWebSocketMessageBrokerConfigurer {
@@ -22,16 +21,8 @@ public class WebSocketConfig extends AbstractSecurityWebSocketMessageBrokerConfi
 
     @Override
     protected void configureInbound(MessageSecurityMetadataSourceRegistry messages) {
-        messages.simpDestMatchers("/secured/**", "/secured/**/**").authenticated().anyMessage().authenticated();
+        messages.anyMessage().authenticated();
     }
-
- /*   @Override 
-    protected void configureInbound(
-    MessageSecurityMetadataSourceRegistry messages) { 
-        messages
-        .simpDestMatchers("/secured/**").authenticated()
-        .anyMessage().authenticated(); 
-    }*/
  
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
@@ -44,9 +35,7 @@ public class WebSocketConfig extends AbstractSecurityWebSocketMessageBrokerConfi
      //   registry.addEndpoint("/broadcast");  // it is OK to leave it here
         // registry.addEndpoint("/broadcast").withSockJS();
         // custom heartbeat, every 60 sec
-        //registry.addEndpoint("/onep1-game").setAllowedOriginPatterns("*").withSockJS();
-        registry.addEndpoint("/onep1-game").withSockJS();
-
-        
+        registry.addEndpoint("/onep1-game").setAllowedOriginPatterns("*").withSockJS();
+        //registry.addEndpoint("/onep1-game").withSockJS();
     }
 }
