@@ -6,6 +6,7 @@ import org.springframework.security.config.annotation.web.messaging.MessageSecur
 import org.springframework.security.config.annotation.web.socket.AbstractSecurityWebSocketMessageBrokerConfigurer;
 import org.springframework.web.socket.config.annotation.EnableWebSocketMessageBroker;
 import org.springframework.web.socket.config.annotation.StompEndpointRegistry;
+import org.springframework.messaging.simp.SimpMessageType;
 
 
 
@@ -21,7 +22,10 @@ public class WebSocketConfig extends AbstractSecurityWebSocketMessageBrokerConfi
 
     @Override
     protected void configureInbound(MessageSecurityMetadataSourceRegistry messages) {
-        messages.anyMessage().authenticated();
+        messages
+                .simpTypeMatchers(SimpMessageType.CONNECT,
+                        SimpMessageType.DISCONNECT, SimpMessageType.OTHER, SimpMessageType.SUBSCRIBE).permitAll()
+                .anyMessage().authenticated();
     }
  
     @Override
