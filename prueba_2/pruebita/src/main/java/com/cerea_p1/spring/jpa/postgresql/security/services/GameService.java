@@ -21,11 +21,13 @@ public class GameService {
         almacen_partidas = new ConcurrentHashMap<String,Partida>();
     }
 
-    public Partida crearPartida(Jugador jugador) {
+    public Partida crearPartida(Jugador jugador,int nJugadores, int tTurno) {
         Partida game = new Partida(true);
         game.setId(UUID.randomUUID().toString());
         game.addJugador(jugador);
         game.setEstado(EstadoPartidaEnum.NEW);
+        game.setNJugadores(nJugadores);
+        game.setTTurno(tTurno);
         almacen_partidas.put(game.getId(),game);
         return game;
     }
@@ -54,7 +56,9 @@ public class GameService {
             Optional<Partida> optionalGame;
             if(almacen_partidas.containsKey(gameId))
                 optionalGame = Optional.of(almacen_partidas.get(gameId));
-            else { optionalGame = null; throw new GameException("Esa partida no existe");
+            else {
+                optionalGame = null; 
+                throw new GameException("Esa partida no existe");
             }
 
             optionalGame.orElseThrow(() -> new GameException("Game with provided id doesn't exist"));
@@ -73,6 +77,22 @@ public class GameService {
             }
         } else
             throw new GameException("Jugador no valido");
+    }
+
+    public void beginGame(String gameId){
+        Optional<Partida> optionalGame;
+        if(almacen_partidas.containsKey(gameId))
+            optionalGame = Optional.of(almacen_partidas.get(gameId));
+        else { 
+            optionalGame = null;
+            throw new GameException("Esa partida no existe");
+        }
+
+        optionalGame.orElseThrow(() -> new GameException("Game with provided id doesn't exist"));
+        Partida game = optionalGame.get();
+        if(game.getEstado() == EstadoPartidaEnum.NEW){
+            game.setEstado(EstadoPartidaEnum.IN_PROGRESS);
+        }
     }
 
     /*public Game connectToRandomGame(Player player) {

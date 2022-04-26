@@ -40,7 +40,7 @@ public class GameController {
     @PostMapping("/game/create")
     public ResponseEntity<Partida> crear(@RequestBody CreateGameRequest request) {
         logger.info("create game request by " + request.getPlayerName());
-        return ResponseEntity.ok(gameService.crearPartida(new Jugador(request.getPlayerName())));
+        return ResponseEntity.ok(gameService.crearPartida(new Jugador(request.getPlayerName()), request.getNPlayers(), request.getTTurn()));
     }
 
     @MessageMapping("/onep1-game/{roomId}")
@@ -55,6 +55,19 @@ public class GameController {
              return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
         }
     }
+
+    // @MessageMapping("/onep1-game/{roomId}")
+	// @SendTo("/topic/connect/{roomId}")
+    // @ExceptionHandler(GameException.class)
+    // public ResponseEntity<?> begin(@DestinationVariable("roomId") String roomId, @RequestParam("username") String username) throws GameException {
+    //     try{
+    //         logger.info("connect request by " + username);
+    //         return ResponseEntity.ok(gameService.connectToGame(new Jugador(username), roomId));
+    //     } catch(GameException e) {
+    //     //     return new ResponseEntity.badRequest();
+    //          return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
+    //     }
+    // }
 
     @PostMapping("/disconnect")
     @ExceptionHandler(GameException.class)
