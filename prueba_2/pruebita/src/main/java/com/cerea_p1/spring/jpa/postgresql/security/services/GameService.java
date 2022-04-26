@@ -8,14 +8,13 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.List;
 
 @Service
 @AllArgsConstructor
 public class GameService {
 
     private ConcurrentHashMap<String,Partida> almacen_partidas;
-
-    //private final SowService sowService;
 
     public GameService(){
         almacen_partidas = new ConcurrentHashMap<String,Partida>();
@@ -32,7 +31,7 @@ public class GameService {
         return game;
     }
 
-    public Partida connectToGame(Jugador player, String gameId) {
+    public List<Jugador> connectToGame(Jugador player, String gameId) {
 
         if(player != null){
             Optional<Partida> optionalGame;
@@ -46,7 +45,7 @@ public class GameService {
 
             if(!game.playerAlreadyIn(player))
                 game.addJugador(player);
-            return game;
+            return game.getJugadores();
         } else
             throw new GameException("Jugador no valido");
     }
