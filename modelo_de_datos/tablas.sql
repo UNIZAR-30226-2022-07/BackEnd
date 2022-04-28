@@ -18,10 +18,9 @@ CREATE TABLE Amigo
 
 CREATE TABLE Invitacion
 (
-   usuario1             VARCHAR(255),
-   usuario2             VARCHAR(255),
-   PRIMARY KEY (usuario1,usuario2),
-   FOREIGN KEY (usuario1) REFERENCES Usuario(nombre_de_usuario),
-   FOREIGN KEY (usuario2) REFERENCES Usuario(nombre_de_usuario)
+   emisor               VARCHAR(255),
+   receptor             VARCHAR(255),
+   PRIMARY KEY (emisor,receptor),
+   FOREIGN KEY (emisor) REFERENCES Usuario(nombre_de_usuario),
+   FOREIGN KEY (receptor) REFERENCES Usuario(nombre_de_usuario)
 )
-
