@@ -9,6 +9,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.cerea_p1.spring.jpa.postgresql.model.Usuario;
+import com.cerea_p1.spring.jpa.postgresql.model.friends.Amigo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.*;
@@ -19,18 +20,18 @@ public class UserDetailsImpl implements UserDetails {
 	private String email;
     private String pais;
 	private int puntos;
-//	private List<Usuario> amigos;
+	private List<Amigo> amigos;
 	@JsonIgnore
 	private String password;
-	//private Collection<? extends GrantedAuthority> authorities;
 	
-//	public UserDetailsImpl(String username, String email, String password, String pais, int puntos, List<Usuario> amigos) {
-	public UserDetailsImpl(String username, String email, String password, String pais, int puntos) {
+	public UserDetailsImpl(String username, String email, String password, String pais, int puntos, List<Amigo> amigos) {
+	//public UserDetailsImpl(String username, String email, String password, String pais, int puntos) {
 		this.username = username;
 		this.email = email;
 		this.password = password;
         this.pais = pais;
 		this.puntos = puntos;
+		this.amigos = amigos;
 	}
     	
 	public static UserDetailsImpl build(Usuario user) {
@@ -38,7 +39,7 @@ public class UserDetailsImpl implements UserDetails {
 				user.getUsername(),
 				user.getEmail(),
 				user.getPassword(),
-                user.getPais(), user.getPuntos());//,user.getAmigos());
+                user.getPais(), user.getPuntos(), user.getAmigos());//,user.getAmigos());
 
 
 	}
@@ -65,9 +66,9 @@ public class UserDetailsImpl implements UserDetails {
 		return username;
 	}
 
-	// public List<Usuario> getAmigos(){
-	// 	return this.amigos;
-	// }
+	public List<Amigo> getAmigos(){
+		return this.amigos;
+	}
 
 	@Override
 	public boolean isAccountNonExpired() {
