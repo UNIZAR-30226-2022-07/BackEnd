@@ -31,8 +31,16 @@ public class Usuario {
     @OneToMany(mappedBy = "usuario1", cascade=CascadeType.PERSIST)
     public List<Amigo> amigos;
 
-    @OneToMany(mappedBy = "receptor", cascade=CascadeType.PERSIST)
-    public List<InvitacionAmistad> invitaciones;
+   // @OneToMany(mappedBy = "receptor", cascade=CascadeType.PERSIST)
+    @JoinTable(name = "invitacion", joinColumns = {
+        @JoinColumn(name = "receptor", referencedColumnName = "nombre_de_usuario", nullable = false)}, inverseJoinColumns = {
+        @JoinColumn(name = "emisor", referencedColumnName = "nombre_de_usuario", nullable = false)})
+        @ManyToMany(cascade = CascadeType.PERSIST)
+    public List<Usuario> invitaciones;
+
+  //  @OneToMany(mappedBy = "emisor", cascade=CascadeType.PERSIST)
+    @ManyToMany(mappedBy = "invitaciones")
+    public List<Usuario> invitacionesEnviadas;
 
     @NotNull
     @Column(name="pais", nullable = false, length = 255)
@@ -49,7 +57,9 @@ public class Usuario {
         this.pais = pais;
         this.puntos = 0;
 
-        amigos = new ArrayList<Amigo>();;
+        amigos = new ArrayList<Amigo>();
+        invitaciones = new ArrayList<Usuario>();
+        invitacionesEnviadas = new ArrayList<Usuario>();
     }
 
     public Usuario(){
@@ -59,6 +69,8 @@ public class Usuario {
         pais = null;
         puntos = 0;
         amigos = null;
+        invitaciones = null;
+        invitacionesEnviadas = null;
     }
 
     public String getUsername() {
@@ -111,6 +123,38 @@ public class Usuario {
 
     public void removeAmigo(Amigo amigo){
         this.amigos.remove(amigo);
+    }
+
+    public List<Usuario> getInvitacion(){
+        return this.invitaciones;
+    }
+
+    public void setInvitacion(List<Usuario> inv){
+        invitaciones = inv;
+    }
+
+    public void addInvitacion(Usuario inv){
+        this.invitaciones.add(inv);
+    }
+
+    public void removeInvitacion(Usuario inv){
+        this.invitaciones.remove(inv);
+    }
+
+    public List<Usuario> getInvitacionesEnviadas(){
+        return this.invitacionesEnviadas;
+    }
+
+    public void setInvitacionesEnviadas(List<Usuario> inv){
+        invitacionesEnviadas = inv;
+
+    }
+    public void addInvitacionesEnviadas(Usuario inv){
+        this.invitacionesEnviadas.add(inv);
+    }
+
+    public void removeInvitacionesEnviadas(Usuario inv){
+        this.invitacionesEnviadas.remove(inv);
     }
     
     @Override
