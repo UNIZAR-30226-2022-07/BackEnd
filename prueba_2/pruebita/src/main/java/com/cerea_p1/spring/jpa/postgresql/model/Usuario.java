@@ -3,6 +3,10 @@ package com.cerea_p1.spring.jpa.postgresql.model;
 import javax.persistence.*;
 import javax.validation.constraints.*;
 import java.util.*;
+import javax.persistence.CascadeType;
+
+import com.cerea_p1.spring.jpa.postgresql.model.friends.Amigo;
+import com.cerea_p1.spring.jpa.postgresql.model.friends.InvitacionAmistad;
 
 @Entity
 @Table(name = "usuario", 
@@ -12,24 +16,23 @@ import java.util.*;
             })
 public class Usuario {
 
-    @Id
     @Pattern(regexp = ".+[@].+[\\.].+")
     @Column(name = "correo_electronico", nullable = false, length = 255)
     private String email;
 
+    @Id
     @Column(name = "nombre_de_usuario", nullable = false, length = 255)
     private String username;
     
     @NotNull
     @Column(name="contrasena", nullable = false, length = 255)
     private String password;
-    
-    @NotNull
-    @ManyToMany
-    @JoinTable(name = "amigos", joinColumns = @JoinColumn(name = "usuario1"), inverseJoinColumns = @JoinColumn(name = "usuario2"))
 
-    //@OneToMany(mappedBy = "usuario")
-    private List<Usuario> amigos = new ArrayList<Usuario>();
+    @OneToMany(mappedBy = "usuario1", cascade=CascadeType.PERSIST)
+    public List<Amigo> amigos;
+
+    @OneToMany(mappedBy = "receptor", cascade=CascadeType.PERSIST)
+    public List<InvitacionAmistad> invitaciones;
 
     @NotNull
     @Column(name="pais", nullable = false, length = 255)
@@ -45,10 +48,17 @@ public class Usuario {
         this.password = password;
         this.pais = pais;
         this.puntos = 0;
-        amigos = null;
+
+        amigos = new ArrayList<Amigo>();;
     }
 
     public Usuario(){
+        username = null;
+        email = null;
+        password = null;
+        pais = null;
+        puntos = 0;
+        amigos = null;
     }
 
     public String getUsername() {
@@ -91,12 +101,16 @@ public class Usuario {
         this.puntos = puntos;
     }
 
-    public List<Usuario> getAmigos(){
+    public List<Amigo> getAmigos(){
         return this.amigos;
     }
 
-    public void setAmigo(Usuario amigo) {
-        this.amigos.add(amigo);
+    public void setAmigo(Amigo amigo) {
+       this.amigos.add(amigo);
+    } 
+
+    public void removeAmigo(Amigo amigo){
+        this.amigos.remove(amigo);
     }
     
     @Override

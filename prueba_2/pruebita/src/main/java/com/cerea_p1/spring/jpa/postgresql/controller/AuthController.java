@@ -3,10 +3,6 @@ package com.cerea_p1.spring.jpa.postgresql.controller;
 
 import java.util.Optional;
 
-/* import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors; */
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -21,18 +17,27 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.cerea_p1.spring.jpa.postgresql.model.Usuario;
-import com.cerea_p1.spring.jpa.postgresql.model.Amigo;
+
+import com.cerea_p1.spring.jpa.postgresql.model.friends.Amigo;
+
 import com.cerea_p1.spring.jpa.postgresql.payload.request.LoginRequest;
 import com.cerea_p1.spring.jpa.postgresql.payload.request.SignupRequest;
-import com.cerea_p1.spring.jpa.postgresql.payload.request.AddFriendRequest;
+import com.cerea_p1.spring.jpa.postgresql.payload.request.friends.AddFriendRequest;
 import com.cerea_p1.spring.jpa.postgresql.payload.response.JwtResponse;
 import com.cerea_p1.spring.jpa.postgresql.payload.response.MessageResponse;
+
 import com.cerea_p1.spring.jpa.postgresql.repository.AmigoRepository;
+
 import com.cerea_p1.spring.jpa.postgresql.repository.UsuarioRepository;
 import com.cerea_p1.spring.jpa.postgresql.security.jwt.JwtUtils;
 import com.cerea_p1.spring.jpa.postgresql.security.services.UserDetailsImpl;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.logging.*;
+//import org.slf4j.Logger;
+//import org.slf4j.LoggerFactory;
+
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -42,33 +47,33 @@ public class AuthController {
 	AuthenticationManager authenticationManager;
 	@Autowired
 	UsuarioRepository userRepository;
-	@Autowired
-	AmigoRepository friendRepository;
-	
-//	@Autowired
-//	RoleRepository roleRepository;
+	private static final Logger logger = Logger.getLogger("MyLog");
+
 	@Autowired
 	PasswordEncoder encoder;
 	@Autowired
 	JwtUtils jwtUtils;
 	@PostMapping("/signin")
 	public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
-		Authentication authentication = authenticationManager.authenticate(
+		Authentication authentication = authenticationManager.authenticate( 
+			
 				new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 		String jwt = jwtUtils.generateJwtToken(authentication);
 		
 		UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();		
+
 		return ResponseEntity.ok(new JwtResponse(jwt, 
 												 userDetails.getUsername(), 
 												 userDetails.getEmail(), 
 												 userDetails.getPais(),
-												 userDetails.getPuntos(),
-												 userDetails.getAmigos()));
+												 userDetails.getPuntos()));
 	}
 
 	@PostMapping("/signup")
 	public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
+		logger.info("user=" + signUpRequest.getUsername() + " email=" + signUpRequest.getEmail() + " pais=" + signUpRequest.getPais() + " pass=" + signUpRequest.getPassword());
+
 		if (userRepository.existsByUsername(signUpRequest.getUsername())) {
 			return ResponseEntity
 					.badRequest()
@@ -86,18 +91,4 @@ public class AuthController {
 		userRepository.save(user);
 		return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
 	}
-
-	@GetMapping("/addfriend")
-	public ResponseEntity<?> addFriend(@RequestBody AddFriendRequest addfriendRequest) {
-		if (!userRepository.existsByUsername(addfriendRequest.getUsername())||!userRepository.existsByUsername(addfriendRequest.getFriendname())) {
-			return ResponseEntity
-					.badRequest()
-					.body(new MessageResponse("Error: User or friend is not registered"));
-		} else {
-			Usuario friend = userRepository.findByUsername(addfriendRequest.getFriendname()).get();
-			friendRepository.save(new Amigo(addfriendRequest.getUsername(),friend.getUsername()));
-		}
-		return ResponseEntity.ok(new MessageResponse("Friend added successfully!"));
-	}
-	
 }
