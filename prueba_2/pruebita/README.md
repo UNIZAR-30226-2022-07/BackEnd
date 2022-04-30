@@ -83,7 +83,7 @@ Desconectarse de una partida (ANTES DE QUE EMPIECE):
 
 
 Enviar una petición de amistad
-  - Petición POST a https://onep1.herokuapp.com/send/friend-request
+  - Petición POST a https://onep1.herokuapp.com/friends/send/friend-request
 
   - JSON:
 
@@ -97,7 +97,7 @@ Enviar una petición de amistad
     - Si va mal: codigo 4**, y por qué falla
 
 Ver invitaciones de amistad
-  - Petición POST a https://onep1.herokuapp.com/receive/friend-request
+  - Petición POST a https://onep1.herokuapp.com/friends/receive/friend-request
 
   - JSON:
 
@@ -106,7 +106,70 @@ Ver invitaciones de amistad
         }
   - Devuelve: 
     - Si va bien: codigo 200, 
-      [
-        <nombre_del_amigo>
-      ]
+            [
+              <nombre_del_amigo>
+            ]
+    - Si va mal: codigo 4**, y por qué falla
+
+Aceptar invitación de amistad
+  - Petición POST a https://onep1.herokuapp.com/friends/accept/friend-request
+
+  - JSON:
+
+        {
+          "username": <nombre_de_usuario>,
+          "friendname": <nombre_del_amigo>
+        }
+  - Devuelve: 
+    - Si va bien: codigo 200, 
+            {
+              "message": "Amigo añadido: <nombre_del_amigo>"
+            }
+    - Si va mal: codigo 4**, y por qué falla
+
+Ver lista de amigos
+  - Petición POST a https://onep1.herokuapp.com/friends/friendsList
+
+  - JSON:
+
+        {
+          "username": <nombre_de_usuario>
+        }
+  - Devuelve: 
+    - Si va bien: codigo 200, 
+          [
+            <nombre_del_amigo>
+          ]
+    - Si va mal: codigo 4**, y por qué falla
+
+Cancelar petición de amistad
+  - Petición POST a https://onep1.herokuapp.com/friends/cancel/fiend-request
+
+  - JSON:
+
+        {
+          "username": <nombre_de_usuario>,
+          "friendname": <nombre_del_amigo>
+        }
+  - Devuelve: 
+    - Si va bien: codigo 200, 
+          {
+            "message": "Petición de amistad cancelada: <nombre_del_amigo>"
+          }
+    - Si va mal: codigo 4**, y por qué falla
+
+Eliminar amigo
+  - Petición POST a https://onep1.herokuapp.com/friends/deleteFriend
+
+  - JSON:
+
+        {
+          "username": <nombre_de_usuario>,
+          "friendname": <nombre_del_amigo>
+        }
+  - Devuelve: 
+    - Si va bien: codigo 200, 
+          {
+            "message": "Amigo eliminado: <nombre_del_amigo>"
+          }
     - Si va mal: codigo 4**, y por qué falla
