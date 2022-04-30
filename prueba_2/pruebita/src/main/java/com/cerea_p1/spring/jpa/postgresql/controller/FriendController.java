@@ -1,4 +1,7 @@
 package com.cerea_p1.spring.jpa.postgresql.controller;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 /* import java.util.HashSet;
@@ -21,6 +24,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.cerea_p1.spring.jpa.postgresql.model.Usuario;
 
 import com.cerea_p1.spring.jpa.postgresql.payload.request.friends.AddFriendRequest;
+import com.cerea_p1.spring.jpa.postgresql.payload.request.friends.GetFriendRequest;
+
 import com.cerea_p1.spring.jpa.postgresql.payload.response.MessageResponse;
 
 import com.cerea_p1.spring.jpa.postgresql.repository.AmigoRepository;
@@ -30,6 +35,9 @@ import com.cerea_p1.spring.jpa.postgresql.repository.InvitacionAmistadRepository
 import com.cerea_p1.spring.jpa.postgresql.model.friends.InvitacionAmistad;
 
 import com.cerea_p1.spring.jpa.postgresql.security.jwt.JwtUtils;
+
+import com.cerea_p1.spring.jpa.postgresql.utils.Sender;
+
 
 import java.util.logging.*;
 
@@ -65,11 +73,39 @@ public class FriendController {
 				opUser = userRepository.findByUsername(addfriendRequest.getFriendname());
 				if(opUser.isPresent()){
 					Usuario user2 = opUser.get();
-					logger.info("Usuarios encontrados " + user + " " + user2);
-					invitacionRepository.save(new InvitacionAmistad(user,user2));
+					user2.addInvitacion(user);
+					userRepository.save(user2);
 					return ResponseEntity.ok(new MessageResponse("Petición de amistad enviada a " + user2.getUsername()));
 				} else return ResponseEntity.badRequest().body(new MessageResponse("Error: No se puede enviar la petición de amistad"));
 			} else return ResponseEntity.badRequest().body(new MessageResponse("Error: No se puede enviar la petición de amistad"));
 		}
+	}
+
+	@PostMapping("/receive/friend-request")
+	public ResponseEntity<?> getInvitacionesAmistad(@RequestBody GetFriendRequest getfriendRequest) {
+		logger.info("user1=" + getfriendRequest.getUsername() );
+		if ( (!userRepository.existsByUsername(getfriendRequest.getUsername())) ) {
+			return ResponseEntity
+					.badRequest()
+					.body(new MessageResponse("Error: No se pudo encontrar el usuario"));
+		
+		}else {
+			logger.info("Restricciones cumplidas");
+			Optional<Usuario> opUser = userRepository.findByUsername(getfriendRequest.getUsername());
+			if(opUser.isPresent()){
+				Usuario user = opUser.get();
+				List<Usuario> inv = user.getInvitacion();
+				logger.info("Se obtienen las peticiones de amistad" + inv);
+				return ResponseEntity.ok(Sender.enviar(friendsToString(inv)));
+			} else return ResponseEntity.badRequest().body(new MessageResponse("Error: No se pueden recuperar las peticiones de amistad."));
+		}
+	}
+
+	private List<String> friendsToString(List<Usuario> l){
+		List<String> l2 = new ArrayList<String>();
+		for(Usuario u : l){
+			l2.add(u.getUsername());
+		}
+		return l2;
 	}
 }

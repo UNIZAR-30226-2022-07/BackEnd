@@ -3,10 +3,6 @@ package com.cerea_p1.spring.jpa.postgresql.controller;
 
 import java.util.Optional;
 
-/* import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors; */
 import javax.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -39,10 +35,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.logging.*;
-//import org.slf4j.Logger;
-//import org.slf4j.LoggerFactory;
-
-
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
 @RequestMapping("/api/auth")
@@ -59,7 +51,8 @@ public class AuthController {
 	JwtUtils jwtUtils;
 	@PostMapping("/signin")
 	public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
-		Authentication authentication = authenticationManager.authenticate(
+		Authentication authentication = authenticationManager.authenticate( 
+			
 				new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 		SecurityContextHolder.getContext().setAuthentication(authentication);
 		String jwt = jwtUtils.generateJwtToken(authentication);
