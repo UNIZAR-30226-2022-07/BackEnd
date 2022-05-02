@@ -9,7 +9,6 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.cerea_p1.spring.jpa.postgresql.model.Usuario;
-import com.cerea_p1.spring.jpa.postgresql.model.friends.Amigo;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.*;
