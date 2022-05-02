@@ -21,11 +21,10 @@ import org.springframework.stereotype.Controller;
 import com.cerea_p1.spring.jpa.postgresql.utils.Sender;
 import org.springframework.messaging.handler.annotation.Header;
 
-//@RestController
+
 @Slf4j
 @CrossOrigin(allowCredentials = "true", origins = "http://localhost:4200/") // con asterisco no funciona
 @AllArgsConstructor
-//@RequestMapping("/game")
 @Controller
 public class GameController {
     private final GameService gameService = new GameService();
