@@ -39,12 +39,12 @@ public class GameController {
     }
 
     @MessageMapping("/connect/{roomId}")
-	  @SendTo("/topic/connect/{roomId}")
+	@SendTo("/topic/game/{roomId}")
     @ExceptionHandler(GameException.class)
     public String connect(@DestinationVariable("roomId") String roomId, @Header("username") String username) { 
         try{
-			      logger.info("connect request by " + username);
-			      return Sender.enviar(gameService.connectToGame(new Jugador(username), roomId));
+			logger.info("connect request by " + username);
+			return Sender.enviar(gameService.connectToGame(new Jugador(username), roomId));
         } catch(GameException e) {
           	return Sender.enviar(e);
         }
@@ -52,21 +52,25 @@ public class GameController {
 
 
     @MessageMapping("/game/begin")
-	  @SendTo("/topic/begin")
+	@SendTo("/topic/game/{roomId}")
     @ExceptionHandler(GameException.class)
     public String begin(@DestinationVariable("roomId") String roomId, @RequestParam("username") String username) throws GameException {
         try{
             logger.info("begin game request by " + username);
             gameService.beginGame(roomId);
             // ENVIAR MANOS INICIALES A TODOS LOS JUGADORES
-            return Sender.enviar(gameService.connectToGame(new Jugador(username), roomId));
+            Partida game = gameService.beginGame(roomId);
+            for(Jugador j : game.getJugadores()){
+                simpMessagingTemplate.convertAndSendToUser(j.getNombre(), "/game", j.getCartas());
+            }
+            return Sender.enviar(game.getCartaInicial());
         } catch(GameException e) {
             return Sender.enviar(e);
         }
     }
 
     @MessageMapping("/disconnect/{roomId}")
-    @SendTo("/topic/disconnect/{roomId}")
+    @SendTo("/topic/game/{roomId}")
     @ExceptionHandler(GameException.class)
     public String disconnect(@DestinationVariable("roomId") String roomId, @Header("username") String username) {
         try{
