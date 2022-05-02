@@ -5,9 +5,6 @@ import javax.validation.constraints.*;
 import java.util.*;
 import javax.persistence.CascadeType;
 
-import com.cerea_p1.spring.jpa.postgresql.model.friends.Amigo;
-import com.cerea_p1.spring.jpa.postgresql.model.friends.InvitacionAmistad;
-
 @Entity
 @Table(name = "usuario", 
             uniqueConstraints = { 
@@ -27,6 +24,7 @@ public class Usuario {
     @NotNull
     @Column(name="contrasena", nullable = false, length = 255)
     private String password;
+
 
    // @OneToMany(mappedBy = "receptor", cascade=CascadeType.PERSIST)
     @JoinTable(name = "invitacion", joinColumns = {
@@ -48,6 +46,7 @@ public class Usuario {
   //  @OneToMany(mappedBy = "emisor", cascade=CascadeType.PERSIST)
     @ManyToMany(mappedBy = "amigos")
     public List<Usuario> amigosInv;
+
 
     @NotNull
     @Column(name="pais", nullable = false, length = 255)
@@ -77,6 +76,7 @@ public class Usuario {
         pais = null;
         puntos = 0;
         amigos = null;
+
         amigosInv = null;
         invitaciones = null;
         invitacionesEnviadas = null;

@@ -1,17 +1,13 @@
 package com.cerea_p1.spring.jpa.postgresql.security.services;
 
 import java.util.Collection;
-//import java.util.List;
 import java.util.Objects;
-//import java.util.stream.Collectors;
 import org.springframework.security.core.GrantedAuthority;
-//import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import com.cerea_p1.spring.jpa.postgresql.model.Usuario;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import java.util.*;
 
 public class UserDetailsImpl implements UserDetails {
 	private static final long serialVersionUID = 1L;
@@ -19,11 +15,12 @@ public class UserDetailsImpl implements UserDetails {
 	private String email;
     private String pais;
 	private int puntos;
+
 	@JsonIgnore
 	private String password;
 	
 	public UserDetailsImpl(String username, String email, String password, String pais, int puntos) {
-	//public UserDetailsImpl(String username, String email, String password, String pais, int puntos) {
+
 		this.username = username;
 		this.email = email;
 		this.password = password;
@@ -36,9 +33,7 @@ public class UserDetailsImpl implements UserDetails {
 				user.getUsername(),
 				user.getEmail(),
 				user.getPassword(),
-                user.getPais(), user.getPuntos());//,user.getAmigos());
-
-
+                user.getPais(), user.getPuntos());
 	}
 	@Override
 	public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -89,8 +84,4 @@ public class UserDetailsImpl implements UserDetails {
 		return Objects.equals(email, user.email);
 	}
 
-/*	@Override
-	public int hashCode(){
-		return this.getUsername().hashCode();
-	}*/
 }
