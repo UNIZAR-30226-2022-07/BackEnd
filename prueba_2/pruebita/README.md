@@ -47,7 +47,9 @@ Crear una partida:
   - JSON:
 
         {
-          "playerName": <nombre_de_usuario>
+            "playername": <nombre_del_usuario>,
+            "nplayers": <numero_de_jugadores>,
+            "tturn": <tiempo_de_turno>
         }
 
   - Devuelve: 
@@ -162,3 +164,18 @@ Eliminar amigo
 
 Endpoint al que se debe conectar el websocket: https://onep1.herokuapp.com/onep1-game
 
+
+
+Cada usuario debería suscribirse a /user/{username}/msg (es donde llegarán los mensajes específicos para el usuario)
+
+Suscribirse a una partida /topic/game/{roomId}
+
+
+
+Enviar un mensaje para conectarse a la partida /connect/{roomId}
+  - Body : nombre de usuario
+
+Enviar un mensaje para empezar una partida /begin/{roomId}
+  - Body : nombre de usuario
+
+Enviar un mensaje para desconectarse de una partida /diconnect/{roomId}
