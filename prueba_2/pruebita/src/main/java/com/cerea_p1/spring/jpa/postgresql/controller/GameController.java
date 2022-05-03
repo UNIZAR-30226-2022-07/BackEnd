@@ -40,7 +40,7 @@ public class GameController {
 
     @MessageMapping("/connect/{roomId}")
 	@SendTo("/topic/game/{roomId}")
-    @ExceptionHandler(GameException.class)
+    //@ExceptionHandler(GameException.class)
     public String connect(@DestinationVariable("roomId") String roomId, @Header("username") String username) { 
         try{
 			logger.info("connect request by " + username);
@@ -51,14 +51,14 @@ public class GameController {
     }
 
 
-    @MessageMapping("/game/begin")
+    @MessageMapping("/begin/{roomId}")
 	@SendTo("/topic/game/{roomId}")
     @ExceptionHandler(GameException.class)
     public String begin(@DestinationVariable("roomId") String roomId, @Header("username") String username) throws GameException {
         try{
             logger.info("begin game request by " + username);
             gameService.beginGame(roomId);
-            // ENVIAR MANOS INICIALES A TODOS LOS JUGADORES
+            //ENVIAR MANOS INICIALES A TODOS LOS JUGADORES
             Partida game = gameService.beginGame(roomId);
             for(Jugador j : game.getJugadores()){
                 simpMessagingTemplate.convertAndSendToUser(j.getNombre(), "/game", j.getCartas());
@@ -71,7 +71,7 @@ public class GameController {
 
     @MessageMapping("/disconnect/{roomId}")
     @SendTo("/topic/game/{roomId}")
-    @ExceptionHandler(GameException.class)
+    //@ExceptionHandler(GameException.class)
     public String disconnect(@DestinationVariable("roomId") String roomId, @Header("username") String username) {
         try{
             logger.info("disconnect request by " + username);
