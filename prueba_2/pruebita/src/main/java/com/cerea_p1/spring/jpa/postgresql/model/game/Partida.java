@@ -18,6 +18,8 @@ public class Partida {
         baraja = barajaInicial();
         descartes = new ArrayList<Carta>();
         partidaPrivada = tipoPartida;
+        descartes.add(baraja.get(baraja.size()-1));
+        baraja.remove(baraja.size()-1);
     }
 
     public void setTipo(boolean tipo){
@@ -174,22 +176,15 @@ public class Partida {
     }
 
     public void repartirManos() {
-        for(int i=0; i<7; ++i) {
+        for(int i=0; i<7; i++) {
             for (Jugador j : jugadores) {
                 j.addCarta(baraja.get(baraja.size()-1));
                 baraja.remove(baraja.size()-1);
             }
         }
     }
-    
-    public Carta getCartaInicial() {
-        Carta inicial = baraja.get(baraja.size()-1);
-        descartes.add(inicial);
-        baraja.remove(baraja.size()-1);
-        return inicial;
-    }
 
-    public Carta getUltimaCarta(){
+    public Carta getUltimaCartaJugada(){
         return descartes.get(descartes.size()-1);
     }
 
