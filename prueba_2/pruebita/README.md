@@ -86,14 +86,14 @@ Ver invitaciones de amistad
 
   - JSON:
 
-        {
-          "username": <nombre_de_usuario>
-        }
+          {
+            "username": <nombre_de_usuario>
+          }
   - Devuelve: 
     - Si va bien: codigo 200, 
-            {
-              "message": "[ <nombre_del_amigo1>, <nombre_del_amigo2>, ...]"
-            }
+          {
+            "message": "[ <nombre_del_amigo1>, <nombre_del_amigo2>, ...]"
+          }
     - Si va mal: codigo 4**, y por qué falla
 
 Aceptar invitación de amistad
@@ -101,15 +101,17 @@ Aceptar invitación de amistad
 
   - JSON:
 
-        {
-          "username": <nombre_de_usuario>,
-          "friendname": <nombre_del_amigo>
-        }
+          {
+            "username": <nombre_de_usuario>,
+            "friendname": <nombre_del_amigo>
+          }
   - Devuelve: 
-    - Si va bien: codigo 200, 
-            {
-              "message": "Amigo añadido: <nombre_del_amigo>"
-            }
+    - Si va bien: codigo 200
+     
+          {
+            "message": "Amigo añadido: <nombre_del_amigo>"
+          }
+          
     - Si va mal: codigo 4**, y por qué falla
 
 Ver lista de amigos
@@ -117,11 +119,12 @@ Ver lista de amigos
 
   - JSON:
 
-        {
-          "username": <nombre_de_usuario>
-        }
+          {
+            "username": <nombre_de_usuario>
+          }
   - Devuelve: 
-    - Si va bien: codigo 200, 
+    - Si va bien: codigo 200
+    
           {
               "message": "[ <nombre_del_amigo1>, <nombre_del_amigo2>, ...]"
           }
@@ -133,15 +136,17 @@ Cancelar petición de amistad
 
   - JSON:
 
-        {
-          "username": <nombre_de_usuario>,
-          "friendname": <nombre_del_amigo>
-        }
+          {
+            "username": <nombre_de_usuario>,
+            "friendname": <nombre_del_amigo>
+          }
   - Devuelve: 
-    - Si va bien: codigo 200, 
+    - Si va bien: codigo 200
+     
           {
             "message": "Petición de amistad cancelada: <nombre_del_amigo>"
           }
+          
     - Si va mal: codigo 4**, y por qué falla
 
 Eliminar amigo
@@ -149,15 +154,17 @@ Eliminar amigo
 
   - JSON:
 
-        {
-          "username": <nombre_de_usuario>,
-          "friendname": <nombre_del_amigo>
-        }
+          {
+            "username": <nombre_de_usuario>,
+            "friendname": <nombre_del_amigo>
+          }
   - Devuelve: 
-    - Si va bien: codigo 200, 
+    - Si va bien: codigo 200
+     
           {
             "message": "Amigo eliminado: <nombre_del_amigo>"
           }
+          
     - Si va mal: codigo 4**, y por qué falla
 
 Ranking de un pais
@@ -165,14 +172,16 @@ Ranking de un pais
 
   - JSON:
 
-        {
-          "pais": <pais_del_usuario>
-        }
+          {
+            "pais": <pais_del_usuario>
+          }
   - Devuelve: 
-    - Si va bien: codigo 200, 
+    - Si va bien: codigo 200
+     
           {
             "message": "[\"3nsalada2,10\",\"3nsalada,3\",\"3nsalada3,0\"]"
           }
+          
     - Si va mal: codigo 4**, y por qué falla
 
 Ranking de un mundial
@@ -182,60 +191,131 @@ Ranking de un mundial
 
 
   - Devuelve: 
-    - Si va bien: codigo 200, 
+    - Si va bien: codigo 200
+     
           {
               "message": "["3nsalada2,10","3nsalada,3","usuario123,0","paulapruebas,0","Helios,0","victor,0","3nsalada3,0","nere.g,0","nereapruebas,0","victorg,0"]"
           }
+          
     - Si va mal: codigo 4**, y por qué falla
 
 Ranking de un Amigos
   - Petición POST a https://onep1.herokuapp.com/ranking/rankingAmigos
 
   - JSON: 
-        {
-          "username": <nombre_del_usuario>
-        } 
+          {
+            "username": <nombre_del_usuario>
+          } 
 
 
   - Devuelve: 
-    - Si va bien: codigo 200, 
+    - Si va bien: codigo 200
+     
           {
             "message": "[\"3nsalada3,0,espagna\",\"nereapruebas,0,España\"]"
           }
+          
     - Si va mal: codigo 4**, y por qué falla
 
 Borrar un usuario
   - Petición POST a https://onep1.herokuapp.com/user/deleteUser
 
   - JSON: 
-        {
-          "username": <nombre_del_usuario>
-        } 
+  
+          {
+            "username": <nombre_del_usuario>
+          } 
 
 
   - Devuelve: 
-    - Si va bien: codigo 200, 
+    - Si va bien: codigo 200
+    
           {
             "message": "Se ha eliminado el usuario correctamente"
           }
+          
     - Si va mal: codigo 4**, y por qué falla
 
 Cambiar el pais de un usuario
   - Petición POST a https://onep1.herokuapp.com/user/changePais
 
   - JSON: 
-        {
-          "username": <nombre_del_usuario>,
-          "pais": <nuevo_pais>
-        } 
+  
+          {
+            "username": <nombre_del_usuario>,
+            "pais": <nuevo_pais>
+          } 
+          
     - Es vuestra responsabilidad que el país se encuentre dentro de la lista de paises que se han establecido
 
   - Devuelve: 
-    - Si va bien: codigo 200, 
+    - Si va bien: codigo 200
+     
           {
             "message": "Se ha actualizado el pais del usuario correctamente."
           }
+          
     - Si va mal: codigo 4**, y por qué falla
+
+Cambiar el nombre de un usuario
+  - Petición POST a https://onep1.herokuapp.com/user/changeUsername
+
+  - JSON: 
+  
+          {
+            "username": <nombre_del_usuario>,
+            "newUsername": <nuevo_nombre_de_usuario>
+          } 
+
+  - Devuelve: 
+    - Si va bien: codigo 200
+     
+          {
+            "message": "Se ha actualizado el nombre del usuario correctamente."
+          }
+          
+    - Si va mal: codigo 4**, y por qué falla
+
+Restablecer la contraseña
+
+  - Petición POST a https://onep1.herokuapp.com/api/auth/forgot_password
+
+  - JSON:
+
+          {
+            "email": <email_con_el_que_se_registro>
+          }
+
+  - Devuelve: 
+    - Si va bien: codigo 200 y envía un correo al usuario con un token para recuperar la contraseña
+     
+          {
+            "message": "Se ha enviado el correo correctamente."
+          }
+          
+    - Si va mal: codigo 4**, y poca info
+
+Establecer nueva contraseña
+
+  - Petición POST a https://onep1.herokuapp.com/api/auth/reset_password
+
+  - JSON:
+
+          {
+            "email": <email_con_el_que_se_registro>
+            "token":<token_que_se_ha_enviado_al_correo>,
+            "password":<nueva_contraseña>
+          }
+
+  - Devuelve: 
+    - Si va bien: codigo 200 
+     
+          {
+            "message": "La contraseña se ha restablecido correctamente"
+          }
+      - Hay que volver a iniciar sesión
+      
+    - Si va mal: codigo 4**, y poca info
 
 ## Websockets
 

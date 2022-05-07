@@ -13,12 +13,14 @@ import javax.persistence.CascadeType;
             })
 public class Usuario {
 
+    @Id
     @Pattern(regexp = ".+[@].+[\\.].+")
     @Column(name = "correo_electronico", nullable = false, length = 255)
     private String email;
 
-    @Id
-    @Column(name = "nombre_de_usuario", nullable = false, length = 255)
+    
+    @Column(name = "nombre_de_usuario", nullable = false, length = 255, unique = true)
+    @Size(min = 4)
     private String username;
     
     @NotNull
@@ -28,18 +30,18 @@ public class Usuario {
 
    // @OneToMany(mappedBy = "receptor", cascade=CascadeType.PERSIST)
     @JoinTable(name = "invitacion", joinColumns = {
-        @JoinColumn(name = "receptor", referencedColumnName = "nombre_de_usuario", nullable = false)}, inverseJoinColumns = {
-        @JoinColumn(name = "emisor", referencedColumnName = "nombre_de_usuario", nullable = false)})
+        @JoinColumn(name = "receptor", referencedColumnName = "correo_electronico", nullable = false)}, inverseJoinColumns = {
+        @JoinColumn(name = "emisor", referencedColumnName = "correo_electronico", nullable = false)})
         @ManyToMany(cascade = CascadeType.PERSIST)
-    public List<Usuario> invitaciones;
+    public List<Usuario> invitacionesRecibidas;
 
   //  @OneToMany(mappedBy = "emisor", cascade=CascadeType.PERSIST)
-    @ManyToMany(mappedBy = "invitaciones")
+    @ManyToMany(mappedBy = "invitacionesRecibidas")
     public List<Usuario> invitacionesEnviadas;
 
     @JoinTable(name = "amigo", joinColumns = {
-        @JoinColumn(name = "usuario2", referencedColumnName = "nombre_de_usuario", nullable = false)}, inverseJoinColumns = {
-        @JoinColumn(name = "usuario1", referencedColumnName = "nombre_de_usuario", nullable = false)})
+        @JoinColumn(name = "usuario2", referencedColumnName = "correo_electronico", nullable = false)}, inverseJoinColumns = {
+        @JoinColumn(name = "usuario1", referencedColumnName = "correo_electronico", nullable = false)})
         @ManyToMany(cascade = CascadeType.PERSIST)
     public List<Usuario> amigos;
 
@@ -56,16 +58,20 @@ public class Usuario {
     @Column(name="puntos", nullable = false)
     private int puntos;
 
+    @Column(name = "reset_password_token")
+    private String resetPasswordToken;
+
     public Usuario(String username, String email, String password, String pais) {
         this.username = username;
         this.email = email;
         this.password = password;
         this.pais = pais;
         this.puntos = 0;
+        resetPasswordToken = "";
 
         amigos = new ArrayList<Usuario>();
         amigosInv = new ArrayList<Usuario>();
-        invitaciones = new ArrayList<Usuario>();
+        invitacionesRecibidas = new ArrayList<Usuario>();
         invitacionesEnviadas = new ArrayList<Usuario>();
     }
 
@@ -76,9 +82,10 @@ public class Usuario {
         pais = null;
         puntos = 0;
         amigos = null;
+        resetPasswordToken = "";
 
         amigosInv = null;
-        invitaciones = null;
+        invitacionesRecibidas = null;
         invitacionesEnviadas = null;
     }
 
@@ -154,20 +161,20 @@ public class Usuario {
         this.amigosInv.remove(amigo);
     }
 
-    public List<Usuario> getInvitacion(){
-        return this.invitaciones;
+    public List<Usuario> getInvitacionesRecibidas(){
+        return this.invitacionesRecibidas;
     }
 
     public void setInvitacion(List<Usuario> inv){
-        invitaciones = inv;
+        invitacionesRecibidas = inv;
     }
 
     public void addInvitacion(Usuario inv){
-        this.invitaciones.add(inv);
+        this.invitacionesRecibidas.add(inv);
     }
 
     public void removeInvitacion(Usuario inv){
-        this.invitaciones.remove(inv);
+        this.invitacionesRecibidas.remove(inv);
     }
 
     public List<Usuario> getInvitacionesEnviadas(){
@@ -184,6 +191,14 @@ public class Usuario {
 
     public void removeInvitacionesEnviadas(Usuario inv){
         this.invitacionesEnviadas.remove(inv);
+    }
+
+    public String getResetPasswordToken(){
+        return resetPasswordToken;
+    }
+
+    public void setResetPasswordToken(String token){
+        resetPasswordToken = token;
     }
     
     @Override
