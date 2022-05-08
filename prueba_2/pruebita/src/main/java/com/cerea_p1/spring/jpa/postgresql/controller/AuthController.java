@@ -132,8 +132,8 @@ public class AuthController {
         SimpleMailMessage msg = new SimpleMailMessage();
         msg.setTo(to);
 
-        msg.setSubject("Testing from Spring Boot");
-        msg.setText("Para restablecer su contraseña, indique el siguiente token: " + token);
+        msg.setSubject("Recuperar contraseña");
+        msg.setText("Para restablecer su contraseña, introduzca el siguiente token: " + token);
 
         javaMailSender.send(msg);
 
