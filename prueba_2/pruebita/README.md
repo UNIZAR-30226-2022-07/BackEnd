@@ -49,7 +49,16 @@ Crear una partida:
         {
             "playername": <nombre_del_usuario>,
             "nplayers": <numero_de_jugadores>,
-            "tturn": <tiempo_de_turno>
+            "tturn": <tiempo_de_turno>,
+            "rules": [
+              {
+                [CERO_SWITCH, CRAZY_7, PROGRESSIVE_DRAW, CHAOS_DRAW, BLOCK_DRAW, REPEAT_DRAW]
+              },
+              {
+                [CERO_SWITCH, CRAZY_7, PROGRESSIVE_DRAW, CHAOS_DRAW, BLOCK_DRAW, REPEAT_DRAW]
+              }
+              ...
+            ]
         }
 
   - Devuelve: 
@@ -356,6 +365,42 @@ Partidas de un usuario
      
           {
             codigo de partida
+          }
+      
+    - Si va mal: codigo 4**, y por qué falla
+
+Información de la partida
+
+Partidas de un usuario
+
+  - Peticion POST a : https://onep1.herokuapp.com/game/getInfoPartida
+
+  - JSON:
+
+          {
+            "idPartida": <id_de_la_partida>
+          }
+
+  - Devuelve: 
+    - Si va bien: codigo 200 
+     
+          {
+            "numeroJugadores": <numero_de_jugadores_dentro_de_la_sala>,
+            "tiempoTurno": <tiempo_de_turno>,
+            "jugadores": [
+              <nombre_jugador1>,
+              <nombre_jugador2>,
+              ...
+            ],
+            "reglas": [
+              {
+                [CERO_SWITCH, CRAZY_7, PROGRESSIVE_DRAW, CHAOS_DRAW, BLOCK_DRAW, REPEAT_DRAW]
+              },
+              {
+                [CERO_SWITCH, CRAZY_7, PROGRESSIVE_DRAW, CHAOS_DRAW, BLOCK_DRAW, REPEAT_DRAW]
+              }
+              ...
+            ]
           }
       
     - Si va mal: codigo 4**, y por qué falla

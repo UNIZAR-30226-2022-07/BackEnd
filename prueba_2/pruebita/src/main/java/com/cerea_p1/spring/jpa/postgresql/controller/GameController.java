@@ -4,6 +4,8 @@ import com.cerea_p1.spring.jpa.postgresql.model.game.*;
 import com.cerea_p1.spring.jpa.postgresql.payload.request.game.CreateGameRequest;
 import com.cerea_p1.spring.jpa.postgresql.payload.request.game.DisconnectRequest;
 import com.cerea_p1.spring.jpa.postgresql.payload.request.game.GetPartidas;
+import com.cerea_p1.spring.jpa.postgresql.payload.request.game.InfoGame;
+import com.cerea_p1.spring.jpa.postgresql.payload.response.InfoPartida;
 import com.cerea_p1.spring.jpa.postgresql.payload.response.Jugada;
 import com.cerea_p1.spring.jpa.postgresql.payload.response.MessageResponse;
 import com.cerea_p1.spring.jpa.postgresql.security.services.GameService;
@@ -19,17 +21,23 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.handler.annotation.SendTo;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.*;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.stereotype.Controller;
 import com.cerea_p1.spring.jpa.postgresql.utils.Sender;
+import com.google.gson.Gson;
+
 import org.springframework.messaging.handler.annotation.Header;
 import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 
 
 @Slf4j
-@CrossOrigin(allowCredentials = "true", origins = "http://localhost:4200/")
+@CrossOrigin(allowCredentials = "true", origins = {"http://localhost:4200/", "https://one-fweb.herokuapp.com"})
 @AllArgsConstructor
 @Controller
 public class GameController {
@@ -41,9 +49,18 @@ public class GameController {
     private static final Logger logger = Logger.getLogger("MyLog");
 
     @PostMapping("/game/create")
-    public ResponseEntity<Partida> create(@RequestBody CreateGameRequest request) {
-        logger.info("create game request by " + request.getPlayername() + ". NJugadores = "+request.getNPlayers()+". tTurn = "+request.getTTurn());
-        return ResponseEntity.ok(gameService.crearPartida(new Jugador(request.getPlayername()), request.getNPlayers(), request.getTTurn()));
+    public ResponseEntity<?> create(@RequestBody CreateGameRequest request) {
+        logger.info("create game request by " + request.getPlayername() + ". NJugadores = "+request.getNPlayers()+". tTurn = "+request.getTTurn() + " reglas = " + request.getRules());
+        List<Regla> l = new ArrayList<Regla>();
+        boolean f = false;
+        for(Regla r : request.getRules()){
+            if(l.contains(r)) f = true;
+            else l.add(r);
+        }
+        if(f){
+            return ResponseEntity.badRequest().body(new MessageResponse("No puede haber reglas repetidas"));
+        } else
+            return ResponseEntity.ok(gameService.crearPartida(new Jugador(request.getPlayername()), request.getNPlayers(), request.getTTurn(), request.getRules()));
     }
 
     @PostMapping("/game/getCartas")
@@ -67,6 +84,20 @@ public class GameController {
         } else return ResponseEntity.ok(s);
     }
 
+    @PostMapping("/game/getInfoPartida")
+    public ResponseEntity<?> getInfoPartida(@RequestBody InfoGame idPartida){
+        logger.info(idPartida.getIdPartida());
+        if(gameService.existPartida(idPartida.getIdPartida())){
+            
+            Partida p = gameService.getPartida(idPartida.getIdPartida());
+            List<String> j = new ArrayList<String>();
+            for(Jugador g : p.getJugadores()){
+                j.add(g.getNombre());
+            }
+            return ResponseEntity.ok(Sender.enviar(new InfoPartida(p.getJugadores().size(), p.getTTurno(), j, p.getReglas())));
+        } else return ResponseEntity.badRequest().body("Esa partida no existe");
+    }
+
     @MessageMapping("/connect/{roomId}")
 	@SendTo("/topic/connect/{roomId}")
     @MessageExceptionHandler()
@@ -85,6 +116,7 @@ public class GameController {
     @MessageExceptionHandler()
     public String begin(@DestinationVariable("roomId") String roomId, @Header("username") String username) {
         try{
+            System.out.println(Numero.CERO);
             logger.info("begin game request by " + username);
             //ENVIAR MANOS INICIALES A TODOS LOS JUGADORES
             Partida game = gameService.beginGame(roomId);
@@ -92,7 +124,7 @@ public class GameController {
                 logger.info("send to " + j.getNombre());
                 simpMessagingTemplate.convertAndSendToUser(j.getNombre(), "/msg", j.getCartas());
             }
-            logger.info(Sender.enviar(game.getUltimaCartaJugada()));
+
             return Sender.enviar(game.getUltimaCartaJugada());
         } catch(Exception e) {
             logger.warning("Exception" + e.getMessage());
@@ -116,9 +148,10 @@ public class GameController {
     @MessageMapping("/card/play/{roomId}")
     @SendTo("/topic/jugada/{roomId}")
     @MessageExceptionHandler()
-    public String card(@DestinationVariable("roomId") String roomId, @Header("username") String username, @RequestBody Carta c) {
+    public String card(@DestinationVariable("roomId") String roomId,@Payload String c, @Header("username") String username) {
         try{
-            logger.info(c.getNumero()+" "+c.getColor()+ " played by "+ username);
+            Carta carta = new Gson().fromJson(c, Carta.class);
+            logger.info(carta.getNumero()+" "+carta.getColor()+ " played by "+ username);
 
             Partida game = gameService.getPartida(roomId);
             // for(Jugador j : game.getJugadores()){
@@ -126,7 +159,7 @@ public class GameController {
             //     simpMessagingTemplate.convertAndSendToUser(j.getNombre(), "/msg", "Siguiente turno");
             // }
 
-            return Sender.enviar(gameService.playCard(roomId, new Jugador(username), c));
+            return Sender.enviar(gameService.playCard(roomId, new Jugador(username), carta));
         } catch(Exception e){
             logger.warning("Exception" + e.getMessage());
             return Sender.enviar(e);
