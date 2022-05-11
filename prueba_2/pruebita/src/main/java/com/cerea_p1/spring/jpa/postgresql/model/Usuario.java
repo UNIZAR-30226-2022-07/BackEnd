@@ -2,6 +2,10 @@ package com.cerea_p1.spring.jpa.postgresql.model;
 
 import javax.persistence.*;
 import javax.validation.constraints.*;
+
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import java.util.*;
 import javax.persistence.CascadeType;
 
@@ -27,25 +31,22 @@ public class Usuario {
     @Column(name="contrasena", nullable = false, length = 255)
     private String password;
 
-
-   // @OneToMany(mappedBy = "receptor", cascade=CascadeType.PERSIST)
     @JoinTable(name = "invitacion", joinColumns = {
         @JoinColumn(name = "receptor", referencedColumnName = "correo_electronico", nullable = false)}, inverseJoinColumns = {
         @JoinColumn(name = "emisor", referencedColumnName = "correo_electronico", nullable = false)})
-        @ManyToMany(cascade = CascadeType.PERSIST)
+        @ManyToMany(cascade = {CascadeType.PERSIST})
+    // @PreRemove
     public List<Usuario> invitacionesRecibidas;
 
-  //  @OneToMany(mappedBy = "emisor", cascade=CascadeType.PERSIST)
     @ManyToMany(mappedBy = "invitacionesRecibidas")
     public List<Usuario> invitacionesEnviadas;
 
     @JoinTable(name = "amigo", joinColumns = {
         @JoinColumn(name = "usuario2", referencedColumnName = "correo_electronico", nullable = false)}, inverseJoinColumns = {
         @JoinColumn(name = "usuario1", referencedColumnName = "correo_electronico", nullable = false)})
-        @ManyToMany(cascade = CascadeType.PERSIST)
+        @ManyToMany(cascade = {CascadeType.PERSIST})
     public List<Usuario> amigos;
 
-  //  @OneToMany(mappedBy = "emisor", cascade=CascadeType.PERSIST)
     @ManyToMany(mappedBy = "amigos")
     public List<Usuario> amigosInv;
 
@@ -199,6 +200,16 @@ public class Usuario {
 
     public void setResetPasswordToken(String token){
         resetPasswordToken = token;
+    }
+
+    @PreRemove
+    public void removeAmigos(){
+        for(Usuario u : amigos){
+            u.removeAmigo(this);
+        }
+        for(Usuario u : invitacionesEnviadas){
+            u.removeInvitacion(this);
+        }
     }
     
     @Override

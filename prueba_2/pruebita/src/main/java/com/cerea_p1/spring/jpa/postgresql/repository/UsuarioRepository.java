@@ -22,4 +22,5 @@ public interface UsuarioRepository extends JpaRepository<Usuario,String> {
     @Query("SELECT a.username, a.puntos, a.pais FROM Usuario u INNER JOIN u.amigos a  WHERE :username = u.username ORDER BY a.puntos DESC")
     List<String> userRankingAmigos(@Param("username") String username);
     public Usuario findByResetPasswordToken(String token);
+
 }
