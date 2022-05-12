@@ -94,7 +94,7 @@ public class GameController {
             for(Jugador g : p.getJugadores()){
                 j.add(g.getNombre());
             }
-            return ResponseEntity.ok(Sender.enviar(new InfoPartida(p.getJugadores().size(), p.getTTurno(), j, p.getReglas())));
+            return ResponseEntity.ok(Sender.enviar(new InfoPartida(p.getNJugadores(), p.getTTurno(), j, p.getReglas())));
         } else return ResponseEntity.badRequest().body("Esa partida no existe");
     }
 
@@ -123,6 +123,7 @@ public class GameController {
             for(Jugador j : game.getJugadores()){
                 logger.info("send to " + j.getNombre());
                 simpMessagingTemplate.convertAndSendToUser(j.getNombre(), "/msg", j.getCartas());
+                System.out.println(j.getNombre() + " " + j.getCartas());
             }
 
             return Sender.enviar(game.getUltimaCartaJugada());
@@ -133,7 +134,7 @@ public class GameController {
     }
 
     @MessageMapping("/disconnect/{roomId}")
-    @SendTo("/topic/diconnect/{roomId}")
+    @SendTo("/topic/disconnect/{roomId}")
     @MessageExceptionHandler()
     public String disconnect(@DestinationVariable("roomId") String roomId, @Header("username") String username) {
         try{
@@ -153,13 +154,19 @@ public class GameController {
             Carta carta = new Gson().fromJson(c, Carta.class);
             logger.info(carta.getNumero()+" "+carta.getColor()+ " played by "+ username);
 
-            Partida game = gameService.getPartida(roomId);
+         //   Partida game = gameService.getPartida(roomId);
             // for(Jugador j : game.getJugadores()){
             //     logger.info("send to " + j.getNombre());
             //     simpMessagingTemplate.convertAndSendToUser(j.getNombre(), "/msg", "Siguiente turno");
             // }
+            Jugada j = gameService.playCard(roomId, new Jugador(username), carta);
+            Partida p = gameService.getPartida(roomId);
+            Jugador jugador = p.getJugador(new Jugador(username));
+            if(jugador.getCartas().size() == 0){
+                return Sender.enviar(new String("HA GANADO " + jugador.getNombre()));
+            }
 
-            return Sender.enviar(gameService.playCard(roomId, new Jugador(username), carta));
+            return Sender.enviar(j);
         } catch(Exception e){
             logger.warning("Exception" + e.getMessage());
             return Sender.enviar(e);

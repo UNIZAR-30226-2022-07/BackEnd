@@ -29,5 +29,21 @@ public class Carta {
     public Color getColor(){
         return color;
     }
+
+    @Override
+    public String toString(){
+        return numero + " " + color;
+    }
+
+    @Override
+    public boolean equals(Object o){
+        if(o instanceof Carta){
+            Carta c = (Carta)o;
+            if(((c.getNumero() == Numero.MAS_CUATRO || c.getNumero() == Numero.CAMBIO_COLOR) && c.getNumero() == numero)|| (c.getColor() == this.color && c.getNumero() == this.numero)) return true;
+            else return false;
+        } else {
+            return false;
+        }
+    }
     
 }

@@ -98,11 +98,14 @@ Ver invitaciones de amistad
           {
             "username": <nombre_de_usuario>
           }
+
   - Devuelve: 
     - Si va bien: codigo 200, 
+
           {
             "message": "[ <nombre_del_amigo1>, <nombre_del_amigo2>, ...]"
           }
+
     - Si va mal: codigo 4**, y por qué falla
 
 Aceptar invitación de amistad
@@ -114,6 +117,7 @@ Aceptar invitación de amistad
             "username": <nombre_de_usuario>,
             "friendname": <nombre_del_amigo>
           }
+          
   - Devuelve: 
     - Si va bien: codigo 200
      
@@ -131,6 +135,7 @@ Ver lista de amigos
           {
             "username": <nombre_de_usuario>
           }
+          
   - Devuelve: 
     - Si va bien: codigo 200
     
@@ -149,6 +154,7 @@ Cancelar petición de amistad
             "username": <nombre_de_usuario>,
             "friendname": <nombre_del_amigo>
           }
+          
   - Devuelve: 
     - Si va bien: codigo 200
      
@@ -167,6 +173,7 @@ Eliminar amigo
             "username": <nombre_de_usuario>,
             "friendname": <nombre_del_amigo>
           }
+          
   - Devuelve: 
     - Si va bien: codigo 200
      
@@ -184,6 +191,7 @@ Ranking de un pais
           {
             "pais": <pais_del_usuario>
           }
+          
   - Devuelve: 
     - Si va bien: codigo 200
      
@@ -322,6 +330,7 @@ Establecer nueva contraseña
           {
             "message": "La contraseña se ha restablecido correctamente"
           }
+          
       - Hay que volver a iniciar sesión
       
     - Si va mal: codigo 4**, y poca info
@@ -414,24 +423,27 @@ Endpoint al que se debe conectar el websocket: https://onep1.herokuapp.com/onep1
 Cada usuario debería suscribirse a /user/{username}/msg (es donde llegarán los mensajes específicos para el usuario)
 
 
-Para enviar un mensaje SIEMPRE tiene que tener el header { username: <nombre_de_usuario> } en el mensaje
+Para enviar un mensaje SIEMPRE tiene que tener el header { username: <nombre_de_usuario> (y authorization)} en el mensaje
 
-Enviar un mensaje para conectarse a la partida /connect/{roomId}
+Enviar un mensaje para conectarse a la partida /game/connect/{roomId}
   - Suscribirse a /topic/connect/{roomId}
     - Header : nombre de usuario
     - Body : vacio
+  - Devuelve la lista de jugadores
 
-Enviar un mensaje para empezar una partida /begin/{roomId}
+Enviar un mensaje para empezar una partida /game/begin/{roomId}
   - Suscribirse a /topic/begin/{roomId}
     - Header : nombre de usuario
     - Body : vacio
+  - Devuelve por este canal la carta del medio
+  - Devuelve por /user/{username}/msg el array de cartas de cada jugador
 
-Enviar un mensaje para desconectarse de una partida /diconnect/{roomId}
+Enviar un mensaje para desconectarse de una partida /game/disconnect/{roomId}
   - Suscribirse a /topic/disconnect/{roomId}
     - Header : nombre de usuario
     - Body : vacio
 
-Enviar un mensaje para jugar una carta /card/play/{roomId}
+Enviar un mensaje para jugar una carta /game/card/play/{roomId}
   - Suscribirse a /topic/jugada/{roomId}
     - Header : nombre de usuario
     - Body :
@@ -465,7 +477,7 @@ Enviar un mensaje para jugar una carta /card/play/{roomId}
       
                   
       
-Enviar un mensaje para robar n cartas /card/draw/{roomId}
+Enviar un mensaje para robar n cartas game/card/draw/{roomId}
   - Suscribirse a /topic/jugada/{roomId}
     - Header : nombre de usuario
     - Body :
@@ -511,8 +523,8 @@ Enviar un mensaje para robar n cartas /card/draw/{roomId}
         ]
         
   
-Enviar un mensaje al chat de la partida /message/{roomId}
-  -NUEVO ENDPOINT: Suscribirse a /topic/game/chat/{roomId}
+Enviar un mensaje al chat de la partida /game/message/{roomId}
+  -NUEVO ENDPOINT: Suscribirse a /topic/chat/{roomId}
   -Header : nombre de usuario
   - Body :
   
