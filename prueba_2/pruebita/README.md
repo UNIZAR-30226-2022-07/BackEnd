@@ -350,10 +350,10 @@ Devolver las cartas de un usuario en una partida
     - Si va bien: codigo 200 
      
           {
-            [ "num" : [CERO, UNO, DOS, TRES, CUATRO, CINCO, SEIS, SIETE, OCHO, NUEVE, BLOQUEO, MAS_DOS, CAMBIO_SENTIDO, UNDEFINED, MAS_CUATRO],
-            "col" : [ROJO, AMARILLO, AZUL, VERDE, CAMBIO_COLOR], 
-            "num" : [CERO, UNO, DOS, TRES, CUATRO, CINCO, SEIS, SIETE, OCHO, NUEVE, BLOQUEO, MAS_DOS, CAMBIO_SENTIDO, UNDEFINED, MAS_CUATRO],
-            "col" : [ROJO, AMARILLO, AZUL, VERDE, CAMBIO_COLOR],
+            [ "num" : [CERO, UNO, DOS, TRES, CUATRO, CINCO, SEIS, SIETE, OCHO, NUEVE, BLOQUEO, MAS_DOS, CAMBIO_SENTIDO, CAMBIO_COLOR, MAS_CUATRO],
+            "col" : [ROJO, AMARILLO, AZUL, VERDE, UNDEFINED], 
+            "num" : [CERO, UNO, DOS, TRES, CUATRO, CINCO, SEIS, SIETE, OCHO, NUEVE, BLOQUEO, MAS_DOS, CAMBIO_SENTIDO, CAMBIO_COLOR, MAS_CUATRO],
+            "col" : [ROJO, AMARILLO, AZUL, VERDE, UNDEFINED],
             ... ]
           }
       
@@ -449,8 +449,8 @@ Enviar un mensaje para jugar una carta /game/card/play/{roomId}
     - Body :
  
         {
-          "num" : [CERO, UNO, DOS, TRES, CUATRO, CINCO, SEIS, SIETE, OCHO, NUEVE, BLOQUEO, MAS_DOS, CAMBIO_SENTIDO, UNDEFINED, MAS_CUATRO],
-          "col" : [ROJO, AMARILLO, AZUL, VERDE, CAMBIO_COLOR]
+          "num" : [CERO, UNO, DOS, TRES, CUATRO, CINCO, SEIS, SIETE, OCHO, NUEVE, BLOQUEO, MAS_DOS, CAMBIO_SENTIDO, CAMBIO_COLOR, MAS_CUATRO],
+          "col" : [ROJO, AMARILLO, AZUL, VERDE, UNDEFINED]
         }
         
   - Devuelve:
@@ -459,8 +459,8 @@ Enviar un mensaje para jugar una carta /game/card/play/{roomId}
 
         {
           "carta": {
-            "num" : [CERO, UNO, DOS, TRES, CUATRO, CINCO, SEIS, SIETE, OCHO, NUEVE, BLOQUEO, MAS_DOS, CAMBIO_SENTIDO, UNDEFINED, MAS_CUATRO],
-            "col" : [ROJO, AMARILLO, AZUL, VERDE, CAMBIO_COLOR]
+            "num" : [CERO, UNO, DOS, TRES, CUATRO, CINCO, SEIS, SIETE, OCHO, NUEVE, BLOQUEO, MAS_DOS, CAMBIO_SENTIDO, CAMBIO_COLOR, MAS_CUATRO],
+            "col" : [ROJO, AMARILLO, AZUL, VERDE, UNDEFINED]
           },
           "jugadores": [
             {
@@ -492,8 +492,8 @@ Enviar un mensaje para robar n cartas game/card/draw/{roomId}
 
         {
           "carta": {
-            "num" : [CERO, UNO, DOS, TRES, CUATRO, CINCO, SEIS, SIETE, OCHO, NUEVE, BLOQUEO, MAS_DOS, CAMBIO_SENTIDO, UNDEFINED, MAS_CUATRO],
-            "col" : [ROJO, AMARILLO, AZUL, VERDE, CAMBIO_COLOR]
+            "num" : [CERO, UNO, DOS, TRES, CUATRO, CINCO, SEIS, SIETE, OCHO, NUEVE, BLOQUEO, MAS_DOS, CAMBIO_SENTIDO, CAMBIO_COLOR, MAS_CUATRO],
+            "col" : [ROJO, AMARILLO, AZUL, VERDE, UNDEFINED]
           },
           "jugadores": [
             {
@@ -512,12 +512,12 @@ Enviar un mensaje para robar n cartas game/card/draw/{roomId}
 
         [
           {
-            "num" : [CERO, UNO, DOS, TRES, CUATRO, CINCO, SEIS, SIETE, OCHO, NUEVE, BLOQUEO, MAS_DOS, CAMBIO_SENTIDO, UNDEFINED, MAS_CUATRO],
-            "col" : [ROJO, AMARILLO, AZUL, VERDE, CAMBIO_COLOR]
+            "num" : [CERO, UNO, DOS, TRES, CUATRO, CINCO, SEIS, SIETE, OCHO, NUEVE, BLOQUEO, MAS_DOS, CAMBIO_SENTIDO, CAMBIO_COLOR, MAS_CUATRO],
+            "col" : [ROJO, AMARILLO, AZUL, VERDE, UNDEFINED]
           },
           {
-            "num" : [CERO, UNO, DOS, TRES, CUATRO, CINCO, SEIS, SIETE, OCHO, NUEVE, BLOQUEO, MAS_DOS, CAMBIO_SENTIDO, UNDEFINED, MAS_CUATRO],
-            "col" : [ROJO, AMARILLO, AZUL, VERDE, CAMBIO_COLOR]
+            "num" : [CERO, UNO, DOS, TRES, CUATRO, CINCO, SEIS, SIETE, OCHO, NUEVE, BLOQUEO, MAS_DOS, CAMBIO_SENTIDO, CAMBIO_COLOR, MAS_CUATRO],
+            "col" : [ROJO, AMARILLO, AZUL, VERDE, UNDEFINED]
           },
           ...
         ]
