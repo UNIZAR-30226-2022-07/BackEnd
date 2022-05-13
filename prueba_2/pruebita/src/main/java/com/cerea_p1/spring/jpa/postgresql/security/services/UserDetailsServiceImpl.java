@@ -7,6 +7,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 import javax.persistence.EntityNotFoundException;
 
 import com.cerea_p1.spring.jpa.postgresql.model.Usuario;
@@ -20,9 +22,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
 	@Override
 	//  @Transactional
-	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException{
 		Usuario user = userRepository.findByUsername(username)
 			.orElseThrow(() -> new UsernameNotFoundException("User Not Found with username: " + username));
+			if (!user.getActiva()) throw new UsernameNotFoundException("La cuenta del usuario no está activa.");
 		return UserDetailsImpl.build(user);
 	}
 
@@ -47,5 +50,19 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 		
 		user.setResetPasswordToken(null);
 		userRepository.save(user);
+	}
+
+	public void activarCuenta(String username, String token){
+		Optional<Usuario> user= userRepository.findByUsername(username);
+		if(user.isPresent()){
+			Usuario u = user.get();
+			if(token.equals(u.getRegistroToken())) {
+				u.setActiva();
+				u.setRegistroToken("");
+				userRepository.save(u);
+			} else {
+				throw new EntityNotFoundException("Los tokens no coinciden");
+			}
+		}
 	}
 }

@@ -11,6 +11,8 @@ public class Partida {
     private EstadoPartidaEnum estado;
     private String id;
     private int tTurno;
+    private int index;
+    private int sentido;
     // true indica que la partida es privada, false indica que la partida es pública
     private boolean partidaPrivada;
 
@@ -27,6 +29,8 @@ public class Partida {
         }
         descartes.add(baraja.get(baraja.size()-1));
         baraja.remove(baraja.size()-1);
+        index = 0;
+        sentido = 1;
     }
 
     public void setTipo(boolean tipo){
@@ -203,6 +207,14 @@ public class Partida {
         }
     }
 
+    public void siguienteTurno(){
+        index = (index+sentido)%nJugadores;
+    }
+
+    public Jugador getTurno(){
+        return jugadores.get(index);
+    }
+
     public List<Carta> robarCartas(String nombreJugador, int n) {
         // Frontend espera una lista pequeña en lugar de la mano entera.
         List<Carta> robadas = new ArrayList<Carta>();
@@ -282,5 +294,9 @@ public class Partida {
 
     public void setReglas(List<Regla> reglas) {
         this.reglas = reglas;
+    }
+
+    public void cambioSentido(){
+        sentido = - sentido;
     }
 }

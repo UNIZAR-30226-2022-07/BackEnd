@@ -21,13 +21,15 @@ Registro de usuario:
       
   - Información adicional:
   
-      - username de entre 3 y 255 caracteres
+      - username de entre 4 y 255 caracteres
         
       - password de entre 6 y 255 caracteres
         
       - email que cumpla la siguiente ER: .+[@].+[\\.].+ (algo + @ + algo + . + algo). Máximo 255 caracteres
         
       - pais de máximo 255 caracteres
+
+  - Al registrar un usuario, le manda un correo con un toke, que debe introducir para activar su cuenta
 
 Logear un usuario:
 
@@ -372,9 +374,9 @@ Partidas de un usuario
   - Devuelve: 
     - Si va bien: codigo 200 
      
-          {
-            codigo de partida
-          }
+          
+            <codigo de partida>
+          
       
     - Si va mal: codigo 4**, y por qué falla
 
@@ -413,6 +415,50 @@ Partidas de un usuario
           }
       
     - Si va mal: codigo 4**, y por qué falla
+
+Enviar una invitación de partidas a un usuario
+
+  - Peticion POST a : https://onep1.herokuapp.com/game/getPartidasActivas
+
+  - JSON:
+
+          {
+            "username": <nombre_del_usuario>,
+            "friendname": <nombre_del_amigo_al_que_se_invita>,
+            "gameId": <gameId>
+          }
+
+  - Devuelve: 
+    - Si va bien: codigo 200 
+     
+          {
+            "message": "Amigo <nombre_del_amigo_al_que_se_invita> invitado"
+          }
+          
+      
+    - Si va mal: codigo 4**, y por qué falla
+
+Activar cuenta de usuario
+
+  - Peticion POST a : https://onep1.herokuapp.com/api/auth/activarCuenta
+
+  - JSON:
+
+          {
+            "username": <nombre_de_usuario>,
+            "token": <token_enviado>
+          }
+
+  - Devuelve: 
+    - Si va bien: codigo 200 
+     
+          {
+            "message": "Cuenta activa"
+          }
+          
+      
+    - Si va mal: codigo 4**, y por qué falla
+
 
 ## Websockets
 
@@ -472,7 +518,8 @@ Enviar un mensaje para jugar una carta /game/card/play/{roomId}
               "numeroCartas": <numero_cartas>
             },
             ...
-          ]
+          ],
+          "turno":<username>
         }
       
                   
@@ -505,7 +552,51 @@ Enviar un mensaje para robar n cartas game/card/draw/{roomId}
               "numeroCartas": <numero_cartas>
             },
             ...
-          ]
+          ],
+          "turno":<nombre_usuario>
+        }
+
+      - Devuelve por /user/{username}/msg una lista de cartas:
+
+        [
+          {
+            "num" : [CERO, UNO, DOS, TRES, CUATRO, CINCO, SEIS, SIETE, OCHO, NUEVE, BLOQUEO, MAS_DOS, CAMBIO_SENTIDO, CAMBIO_COLOR, MAS_CUATRO],
+            "col" : [ROJO, AMARILLO, AZUL, VERDE, UNDEFINED]
+          },
+          {
+            "num" : [CERO, UNO, DOS, TRES, CUATRO, CINCO, SEIS, SIETE, OCHO, NUEVE, BLOQUEO, MAS_DOS, CAMBIO_SENTIDO, CAMBIO_COLOR, MAS_CUATRO],
+            "col" : [ROJO, AMARILLO, AZUL, VERDE, UNDEFINED]
+          },
+          ...
+        ]
+
+Enviar un mensaje para pasar de turno (se usa en caso de robar cartas o que te hayan bloqueado etc, no al jugar una carta) game/pasarTurno/{roomId}
+  - AL JUGAR UNA CARTA SE PASA EL TURNO SOLO
+  - Suscribirse a /topic/jugada/{roomId}
+    - Header : nombre de usuario
+    - Body : vacio
+
+  - Devuelve:
+    - Si va bien: 
+      - Devuelve por /topic/jugada/{roomId} un JSON con formato:
+
+        {
+          "carta": {
+            "num" : [CERO, UNO, DOS, TRES, CUATRO, CINCO, SEIS, SIETE, OCHO, NUEVE, BLOQUEO, MAS_DOS, CAMBIO_SENTIDO, CAMBIO_COLOR, MAS_CUATRO],
+            "col" : [ROJO, AMARILLO, AZUL, VERDE, UNDEFINED]
+          },
+          "jugadores": [
+            {
+              "username": "<nombre>",
+              "numeroCartas": <numero_cartas>
+            }, 
+            {
+              "username": "<nombre>",
+              "numeroCartas": <numero_cartas>
+            },
+            ...
+          ],
+          "turno":<nombre_usuario>
         }
 
       - Devuelve por /user/{username}/msg una lista de cartas:
