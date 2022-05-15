@@ -41,6 +41,17 @@ Logear un usuario:
           "username": <nombre_de_usuario>,
           "password": <contraseña>
         }
+    
+  - Devuelve
+
+        {
+          "username": <nombre_de_usuario>,
+          "email": <correo>,
+          "pais": <pais>,
+          "puntos": <puntos>,
+          "accessToken": <token_de_acceso>,
+          "tokenType": "Bearer"
+        }
 
 Crear una partida:
   
@@ -382,8 +393,6 @@ Partidas de un usuario
 
 Información de la partida
 
-Partidas de un usuario
-
   - Peticion POST a : https://onep1.herokuapp.com/game/getInfoPartida
 
   - JSON:
@@ -418,7 +427,7 @@ Partidas de un usuario
 
 Enviar una invitación de partidas a un usuario
 
-  - Peticion POST a : https://onep1.herokuapp.com/game/getPartidasActivas
+  - Peticion POST a : https://onep1.herokuapp.com/game/invite
 
   - JSON:
 
@@ -458,6 +467,64 @@ Activar cuenta de usuario
           
       
     - Si va mal: codigo 4**, y por qué falla
+
+Obtener las invitaciones de partida de un usuario
+
+  - Peticion POST a : https://onep1.herokuapp.com/game/getInvitacionesPartida
+
+  - JSON:
+
+          {
+            "username": <nombre_de_usuario>
+          }
+
+  - Devuelve: 
+    - Si va bien: codigo 200 
+     
+          [
+            {
+              "invitador": <nombre_del_amigo>,
+              "game": <gameId>
+            },
+            {
+              "invitador": <nombre_del_amigo>,
+              "game": <gameId>
+            },
+            ...
+          ]
+          
+      
+    - Si va mal: codigo 4**, y por qué falla
+
+Eliminar una invitación a partida
+
+  - Peticion POST a : https://onep1.herokuapp.com/game/cancelarInvitacionPartida
+
+  - JSON:
+
+          {
+            "username": <nombre_de_usuario>,
+	          "gameId": <id_partida>
+          }
+
+  - Devuelve: 
+    - Si va bien: codigo 200 
+      - Si está disponible la partida
+          {
+            "message": "Se ha eliminado la invitación a partida"
+          }
+      
+      o
+
+      - Si no está diponible esa partida
+          {
+            "message": "No se ha podido eliminar la invitación a partida"
+          }
+          
+      
+    - Si va mal: codigo 4**, y por qué falla
+
+  - Para aceptar la invitación a la partida hay que eliminar la invitación para el usuario y conctarse a la partida
 
 
 ## Websockets

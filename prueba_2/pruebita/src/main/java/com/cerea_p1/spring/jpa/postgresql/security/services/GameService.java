@@ -116,10 +116,19 @@ public class GameService {
         if(game.getEstado() == EstadoPartidaEnum.NEW){
             game.setEstado(EstadoPartidaEnum.IN_PROGRESS);
         }
+        // se eliminan las invitaciones a esa partida
+        for(String s : almacen_invitaciones.keySet()){
+            if(almacen_invitaciones.get(s).contains(new Invitacion_almacen("", gameId))){
+                almacen_invitaciones.get(s).remove(new Invitacion_almacen("", gameId));
+            }
+        }
         if(game.getJugadores().size() == game.getNJugadores()){
             game.repartirManos();
             return game;
         } else throw new BeginGameException("Faltan jugadores.");
+
+        
+        
     }
 
     public Jugada playCard(String gameId, Jugador player, Carta card) {
@@ -129,8 +138,12 @@ public class GameService {
 
             Partida game = optionalGame.get();
             Jugador p = game.getJugador(player);
-            if(p == null) throw new GameException("El juagdor no está en la partida");
-            if(!p.tieneCarta(card)) throw new GameException("El jugador " + p.getNombre() + " no contiene la carta " + card);
+            if(p == null) {
+                throw new GameException("El juagdor no está en la partida");
+            }
+            if(!p.tieneCarta(card)) {
+                throw new GameException("El jugador " + p.getNombre() + " no contiene la carta " + card);
+            }
             game.jugarCarta(card,p.getNombre());
             game.siguienteTurno();
             Jugada play = new Jugada(game.getUltimaCartaJugada(),game.getJugadores(), game.getTurno().getNombre());
@@ -172,13 +185,50 @@ public class GameService {
     public void invitarAmigo(String username, String friendname, String gameId){
         List<Invitacion_almacen> lista;
         if(almacen_invitaciones.containsKey(friendname)){
+            
             lista = almacen_invitaciones.get(friendname);
         } else {
+            System.out.println(friendname + "no tiene invitaciones");
             lista = new ArrayList<Invitacion_almacen>();
         }
         lista.add(new Invitacion_almacen(username, gameId));
+        System.out.println(almacen_invitaciones.size());
         almacen_invitaciones.put(friendname, lista);
+        System.out.println(lista);
+        System.out.println(almacen_invitaciones.size());
     }
 
-    
+    public void finJuego(String idPartida){
+        for(String s : almacen_invitaciones.keySet()){
+            if(almacen_invitaciones.get(s).contains(new Invitacion_almacen("", idPartida))){
+                almacen_invitaciones.get(s).remove(new Invitacion_almacen("", idPartida));
+            }
+        }
+        almacen_partidas.remove(idPartida);
+    }
+
+    public List<Invitacion_almacen> getInvitacionesPartida(String username){
+        if(almacen_invitaciones.containsKey(username)){
+            System.out.println("Hay partidas de  " + username);
+            return almacen_invitaciones.get(username);
+        }
+        else return new ArrayList<Invitacion_almacen>();
+    }
+
+    public boolean deleteGameInvitation(String username, String gameId){
+        if(almacen_invitaciones.containsKey(username)){
+            if(almacen_invitaciones.get(username).contains(new Invitacion_almacen("", gameId))){
+                System.out.println("Contiene esa partida");
+                almacen_invitaciones.get(username).remove(new Invitacion_almacen("", gameId));
+                return true;
+            } else{ 
+                System.out.println("No contiene esa partida");
+                return false;
+            }
+        } else {
+            System.out.println("No aparece el usuario");
+            return false;
+        }
+    }
+
 }

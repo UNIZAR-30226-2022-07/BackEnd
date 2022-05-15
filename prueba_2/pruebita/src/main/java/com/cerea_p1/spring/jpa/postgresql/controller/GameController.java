@@ -3,6 +3,7 @@ package com.cerea_p1.spring.jpa.postgresql.controller;
 import com.cerea_p1.spring.jpa.postgresql.model.Usuario;
 import com.cerea_p1.spring.jpa.postgresql.model.game.*;
 import com.cerea_p1.spring.jpa.postgresql.payload.request.game.CreateGameRequest;
+import com.cerea_p1.spring.jpa.postgresql.payload.request.game.DeleteGameInvitation;
 import com.cerea_p1.spring.jpa.postgresql.payload.request.game.DisconnectRequest;
 import com.cerea_p1.spring.jpa.postgresql.payload.request.game.GetPartidas;
 import com.cerea_p1.spring.jpa.postgresql.payload.request.game.InfoGame;
@@ -128,6 +129,31 @@ public class GameController {
         }
     }
 
+    @PostMapping("/game/getInvitacionesPartida")
+    public ResponseEntity<?> getInvitacionesPartida(@RequestBody GetPartidas request){
+        logger.info("obtener las invitaciones a partida de " + request.getUsername());
+        Optional<Usuario> opU = userRepository.findByUsername(request.getUsername());
+        if(opU.isPresent()){
+            logger.info("Busco las invitaciones a partida de " + request.getUsername());
+            return ResponseEntity.ok(Sender.enviar(gameService.getInvitacionesPartida(request.getUsername())));
+        } else {
+            return ResponseEntity.badRequest().body("No existe el usuario " + request.getUsername());
+        }
+    }
+
+    @PostMapping("/game/cancelarInvitacionPartida")
+    public ResponseEntity<?> deleteInvitacionPartida(@RequestBody DeleteGameInvitation request){
+        logger.info("cancelo la invitacion a la partida " + request.getUsername() + " " + request.getGameId());
+        Optional<Usuario> opU = userRepository.findByUsername(request.getUsername());
+        if(opU.isPresent()){
+            if(gameService.deleteGameInvitation(request.getUsername(), request.getGameId()))
+            return ResponseEntity.ok(new MessageResponse("Se ha eliminado la invitación a partida"));
+            else return ResponseEntity.ok(new MessageResponse("No se ha podido eliminar la invitación a partida"));
+        } else {
+            return ResponseEntity.badRequest().body("No existe el usuario " + request.getUsername());
+        }
+    }
+
     @MessageMapping("/connect/{roomId}")
 	@SendTo("/topic/connect/{roomId}")
     @MessageExceptionHandler()
@@ -184,13 +210,29 @@ public class GameController {
             Carta carta = new Gson().fromJson(c, Carta.class);
             logger.info(carta.getNumero()+" "+carta.getColor()+ " played by "+ username);
             Partida p = gameService.getPartida(roomId);
-            if(p.getTurno().getNombre() != username){
+            logger.info("Es el turno de" + p.getTurno().getNombre());
+            if(!p.getTurno().getNombre().equals(username)){
                 simpMessagingTemplate.convertAndSendToUser(username, "/msg", "No es tu turno");
                 return Sender.enviar(new String("ALGUIEN HA INTENTADO JUGAR Y NO ERA SU TURNO"));
             }
             Jugada j = gameService.playCard(roomId, new Jugador(username), carta);
             Jugador jugador = p.getJugador(new Jugador(username));
             if(jugador.getCartas().size() == 0){
+                Optional<Usuario> opU = userRepository.findByUsername(jugador.getNombre());
+                Usuario u = opU.get();
+                u.setPuntos(u.getPuntos()+20);
+                userRepository.save(u);
+                for(Jugador jj : p.getJugadores()){
+                    if(!jj.getNombre().equals(jugador.getNombre())){
+                        opU = userRepository.findByUsername(jj.getNombre());
+                        u = opU.get();
+                        if(u.getPuntos()-5>0)
+                        u.setPuntos(u.getPuntos()-5);
+                        else u.setPuntos(0);
+                        userRepository.save(u);
+                    }
+                }
+                gameService.finJuego(roomId);
                 return Sender.enviar(new String("HA GANADO " + jugador.getNombre()));
             }
 
@@ -208,13 +250,28 @@ public class GameController {
         try{
            
             Partida p = gameService.getPartida(roomId);
-            if(p.getTurno().getNombre() != username){
+            if(!p.getTurno().getNombre().equals(username)){
                 simpMessagingTemplate.convertAndSendToUser(username, "/msg", "No es tu turno");
                 return Sender.enviar(new String("ALGUIEN HA INTENTADO JUGAR Y NO ERA SU TURNO"));
             }
             p.siguienteTurno();
             Jugador jugador = p.getJugador(new Jugador(username));
             if(jugador.getCartas().size() == 0){
+                Optional<Usuario> opU = userRepository.findByUsername(jugador.getNombre());
+                Usuario u = opU.get();
+                u.setPuntos(u.getPuntos()+20);
+                userRepository.save(u);
+                for(Jugador jj : p.getJugadores()){
+                    if(!jj.getNombre().equals(jugador.getNombre())){
+                        opU = userRepository.findByUsername(jj.getNombre());
+                        u = opU.get();
+                        if(u.getPuntos()-5>0)
+                        u.setPuntos(u.getPuntos()-5);
+                        else u.setPuntos(0);
+                        userRepository.save(u);
+                    }
+                }
+                gameService.finJuego(roomId);
                 return Sender.enviar(new String("HA GANADO " + jugador.getNombre()));
             }
 
@@ -233,12 +290,13 @@ public class GameController {
             logger.info(nCards+" drawn by " + username);
 
             Partida game = gameService.getPartida(roomId);
-            if(game.getTurno().getNombre() != username){
+            if(!game.getTurno().getNombre().equals(username)){
                 simpMessagingTemplate.convertAndSendToUser(username, "/msg", "No es tu turno");
                 return Sender.enviar(new String("ALGUIEN HA INTENTADO JUGAR Y NO ERA SU TURNO"));
             }
             //Enviar cartas robadas al solicitante
-            simpMessagingTemplate.convertAndSendToUser(username, "/msg", gameService.drawCards(roomId, new Jugador(username), nCards));
+            Jugador jugador = game.getJugador(new Jugador(username));
+            simpMessagingTemplate.convertAndSendToUser(username, "/msg", gameService.drawCards(roomId, jugador, nCards));
             
             return Sender.enviar(new Jugada(game.getUltimaCartaJugada(), game.getJugadores(), game.getTurno().getNombre()));
         } catch(Exception e){
