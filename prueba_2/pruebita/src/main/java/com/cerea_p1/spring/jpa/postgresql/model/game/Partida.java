@@ -33,6 +33,26 @@ public class Partida {
         sentido = 1;
     }
 
+    public Partida(int numJugadores, int tTurno, List<Regla> reglas){
+        this.id = UUID.randomUUID().toString();
+        jugadores = new ArrayList<Jugador>();
+        baraja = barajaInicial();
+        descartes = new ArrayList<Carta>();
+        this.reglas = reglas;
+        this.nJugadores = numJugadores;
+        this.tTurno = tTurno;
+        this.estado = EstadoPartidaEnum.NEW;
+        Carta carta = baraja.get(baraja.size()-1);
+        while(carta.getColor() == Color.UNDEFINED){
+            Collections.shuffle(baraja);
+            carta = baraja.get(baraja.size()-1);
+        }
+        descartes.add(baraja.get(baraja.size()-1));
+        baraja.remove(baraja.size()-1);
+        index = 0;
+        sentido = 1;
+    }
+
     public void setTipo(boolean tipo){
         partidaPrivada = tipo;
     }
@@ -202,13 +222,20 @@ public class Partida {
     public void jugarCarta(Carta c, String nombreJugador) {
         descartes.add(c);
         for (Jugador j : jugadores) {
-            if (j.getNombre().equals(nombreJugador))
+            if (j.getNombre().equals(nombreJugador)){
+                if(c.numero.equals(Numero.CAMBIO_SENTIDO)){
+                    cambioSentido();
+                }
                 j.deleteCarta(c);
+            }
         }
     }
 
     public void siguienteTurno(){
         index = (index+sentido)%nJugadores;
+        if(index <  0){
+            index = (index + nJugadores) % nJugadores;
+        }
     }
 
     public Jugador getTurno(){

@@ -544,6 +544,63 @@ Buscar una partida pública
   - Es necesario suscribirse a todos los canales asociados a la partida
   - Cualquier jugador debería poder comenzar la partida cuando se haya llenado (haya 4 jugadores)
 
+Crear un torneo
+ 
+  - Peticion POST a : https://onep1.herokuapp.com/torneo/createTorneo
+
+  - JSON: 
+          {
+            "username":<nombre_de_usuario>,
+            "tiempoTurno":<tiempo_de_turno>,
+            "reglas": [
+              {
+                [CERO_SWITCH, CRAZY_7, PROGRESSIVE_DRAW, CHAOS_DRAW, BLOCK_DRAW, REPEAT_DRAW]
+              },
+              {
+                [CERO_SWITCH, CRAZY_7, PROGRESSIVE_DRAW, CHAOS_DRAW, BLOCK_DRAW, REPEAT_DRAW]
+              }
+              ...
+            ]
+          }
+
+  - Devuelve: 
+    - Si va bien: codigo 200 
+       {
+          "idTorneo": <id_torneo>,
+          "tiempoTurno": <tiempo de turno>,
+          "jugadores": [
+            <nombre_jugador1>,
+            <nombre_jugador2>,
+            ...
+            
+          ],
+          "reglas": [
+            <regla1>,
+            <regla2>,
+            ...
+          ]
+        }
+          
+      
+    - Si va mal: codigo 4**, y por qué falla
+
+Obtener torneos disponibles
+
+  - Peticion POST a : https://onep1.herokuapp.com/torneo/getTorneos
+
+  - JSON: vacio
+
+  - Devuelve: 
+    - Si va bien: codigo 200 
+        [
+          <id_torneo1>,
+          <id_torneo2>,
+          ...
+        ]
+          
+      
+    - Si va mal: codigo 4**, y por qué falla
+
 ## Websockets
 
 Endpoint al que se debe conectar el websocket: https://onep1.herokuapp.com/onep1-game
@@ -699,8 +756,8 @@ Enviar un mensaje para pasar de turno (se usa en caso de robar cartas o que te h
         
   
 Enviar un mensaje al chat de la partida /game/message/{roomId}
-  -NUEVO ENDPOINT: Suscribirse a /topic/chat/{roomId}
-  -Header : nombre de usuario
+  - NUEVO ENDPOINT: Suscribirse a /topic/chat/{roomId}
+  - Header : <nombre_de_usuario>
   - Body :
   
         {
@@ -717,3 +774,14 @@ Enviar un mensaje al chat de la partida /game/message/{roomId}
   - El mensaje que se envíe se recibirá por el endpoint. 2 opciones para Frontend:
       - Mostrar nuevo mensaje, enviar mensaje a Backend, ignorar respuesta si lo he enviado yo.
       - Enviar mensaje a Backend, mostrar respuesta de Backend.
+
+
+Enviar botón de uno
+  - Suscribirse a /topic/buttonOne/{roomId}
+  - Header : <usuario_que_pulsa_boton>
+  - Body : vacio
+
+  - Devuelve :
+    {
+      <nombre_de_usuario_que_pulsa>
+    }
