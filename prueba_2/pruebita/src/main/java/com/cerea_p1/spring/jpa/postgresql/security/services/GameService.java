@@ -49,6 +49,10 @@ public class GameService {
         return game;
     }
 
+    public void addPartida(Partida p){
+        almacen_partidas.put(p.getId(),p);
+    }
+
     public Partida crearPartidaPublica() {
         Partida game = new Partida(false);
         game.setId(UUID.randomUUID().toString());
@@ -148,9 +152,6 @@ public class GameService {
             game.repartirManos();
             return game;
         } else throw new BeginGameException("Faltan jugadores.");
-
-        
-        
     }
 
     public Jugada playCard(String gameId, Jugador player, Carta card) {

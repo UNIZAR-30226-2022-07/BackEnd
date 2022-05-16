@@ -601,6 +601,25 @@ Obtener torneos disponibles
       
     - Si va mal: codigo 4**, y por qué falla
 
+Jugar la final de un toneo
+
+  - Petición POST a : https://onep1.herokuapp.com/torneo/jugarFinal
+
+  - JSON: 
+          {
+            "username" : <nombre_del_usuario>,
+            "torneoId" : <id_Torneo>
+          }
+
+  - Devuelve: 
+    - Si va bien: codigo 200 
+        <id_partida_final>
+          
+      
+    - Si va mal: codigo 4**, y por qué falla
+
+    
+
 ## Websockets
 
 Endpoint al que se debe conectar el websocket: https://onep1.herokuapp.com/onep1-game
@@ -663,7 +682,6 @@ Enviar un mensaje para jugar una carta /game/card/play/{roomId}
           "turno":<username>
         }
       
-                  
       
 Enviar un mensaje para robar n cartas game/card/draw/{roomId}
   - Suscribirse a /topic/jugada/{roomId}
@@ -785,3 +803,25 @@ Enviar botón de uno
     {
       <nombre_de_usuario_que_pulsa>
     }
+
+
+Enviar un mensaje para conectarse a un torneo /game/connect/torneo/{torneoId}
+  - Suscribirse a /topic/connect/torneo/{torneoId}
+    - Header : nombre de usuario
+    - Body : vacio
+  - Devuelve la lista de jugadores del torneo
+
+
+Enviar un mensaje para desconectarse de un torneo /game/disconnect/torneo/{torneoId}
+  - Suscribirse a /topic/disconnect/torneo/{torneoId}
+    - Header : nombre de usuario
+    - Body : vacio
+
+
+Enviar un mensaje para empezar un torneo /game/begin/torneo/{torneoId}
+  - No hay que suscribirse a ningún canal general
+    - Header : nombre de usuario
+    - Body : vacio
+  - Devuelve por /user/{username}/msg el código de partida de la semifinal a la que se tendrá que unir el usuario
+  - Hay que suscribirse a todos los canales asociados al id de partida que se mandan como si fuera una partida privada
+  - El jugador que esté primero de la lista hace begin de esa partida (?)

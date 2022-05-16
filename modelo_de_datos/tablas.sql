@@ -4,7 +4,10 @@ CREATE TABLE Usuario
    correo_electronico   VARCHAR(255)    PRIMARY KEY,
    contrasena           VARCHAR(255)    NOT NULL,
    pais                 VARCHAR(255)    NOT NULL,
-   puntos               INTEGER     NOT NULL
+   puntos               INTEGER     NOT NULL,
+   reset_password_token VARCHAR(30),
+   registro_token       VARCHAR(30),
+   activa               BOOLEAN NOT NULL DEFAULT false
 );
 
 CREATE TABLE Amigo
