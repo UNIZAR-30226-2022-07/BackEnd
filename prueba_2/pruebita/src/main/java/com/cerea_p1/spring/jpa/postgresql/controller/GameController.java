@@ -2,17 +2,25 @@ package com.cerea_p1.spring.jpa.postgresql.controller;
 
 import com.cerea_p1.spring.jpa.postgresql.model.Usuario;
 import com.cerea_p1.spring.jpa.postgresql.model.game.*;
+import com.cerea_p1.spring.jpa.postgresql.payload.request.ServerPasarTurno;
 import com.cerea_p1.spring.jpa.postgresql.payload.request.game.CambiarManos;
 import com.cerea_p1.spring.jpa.postgresql.payload.request.game.CreateGameRequest;
 import com.cerea_p1.spring.jpa.postgresql.payload.request.game.DeleteGameInvitation;
 import com.cerea_p1.spring.jpa.postgresql.payload.request.game.DisconnectRequest;
+import com.cerea_p1.spring.jpa.postgresql.payload.request.game.GetMano;
 import com.cerea_p1.spring.jpa.postgresql.payload.request.game.GetPartidas;
 import com.cerea_p1.spring.jpa.postgresql.payload.request.game.InfoGame;
+import com.cerea_p1.spring.jpa.postgresql.payload.request.torneo.CheckSemifinal;
+import com.cerea_p1.spring.jpa.postgresql.payload.request.torneo.CrearTorneo;
+import com.cerea_p1.spring.jpa.postgresql.payload.request.torneo.JugarFinal;
 import com.cerea_p1.spring.jpa.postgresql.payload.response.InfoPartida;
 import com.cerea_p1.spring.jpa.postgresql.payload.response.Jugada;
 import com.cerea_p1.spring.jpa.postgresql.payload.response.MessageResponse;
+import com.cerea_p1.spring.jpa.postgresql.payload.response.PartidasResponse;
+import com.cerea_p1.spring.jpa.postgresql.payload.response.torneo.InfoTorneoResponse;
 import com.cerea_p1.spring.jpa.postgresql.repository.UsuarioRepository;
 import com.cerea_p1.spring.jpa.postgresql.security.services.GameService;
+import com.cerea_p1.spring.jpa.postgresql.security.services.TorneoService;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +39,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.*;
+
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.stereotype.Controller;
 import com.cerea_p1.spring.jpa.postgresql.utils.Sender;
@@ -46,12 +55,15 @@ import org.springframework.messaging.handler.annotation.MessageExceptionHandler;
 @Controller
 public class GameController {
     private final GameService gameService = new GameService();
+    private final TorneoService torneoService = new TorneoService();
 
     @Autowired
 	UsuarioRepository userRepository;
 
     @Autowired
     private SimpMessagingTemplate simpMessagingTemplate;
+
+    
 
     private static final Logger logger = Logger.getLogger("MyLog");
 
@@ -89,7 +101,18 @@ public class GameController {
         String s = gameService.getPartidasUser(getPartidas.getUsername());
         if(s == ""){
             return ResponseEntity.ok(new MessageResponse("No hay partidas para el usuario"));
-        } else return ResponseEntity.ok(s);
+        } else return ResponseEntity.ok(new PartidasResponse(s));
+    }
+
+    @PostMapping(value = "/server/pasarTurno", consumes = {"application/json","application/x-www-form-urlencoded"})
+    public ResponseEntity<?> serverPasarTurno(@RequestBody ServerPasarTurno request){
+        logger.info("Ha llegado el método del server");
+        Partida p = gameService.getPartida(request.getIdPartida());
+        p.siguienteTurno();
+        p.startAlarma();
+        simpMessagingTemplate.convertAndSend("/topic/jugada/"+request.getIdPartida(), new Jugada(p.getUltimaCartaJugada(),p.getJugadores(), p.getTurno().getNombre()));
+        
+        return ResponseEntity.ok("GG");
     }
 
     @PostMapping("/game/getInfoPartida")
@@ -102,7 +125,42 @@ public class GameController {
             for(Jugador g : p.getJugadores()){
                 j.add(g.getNombre());
             }
-            return ResponseEntity.ok(Sender.enviar(new InfoPartida(p.getNJugadores(), p.getTTurno(), j, p.getReglas())));
+            return ResponseEntity.ok(Sender.enviar(new InfoPartida(p.getNJugadores(), p.getTTurno(), j, p.getReglas(), p.getEstado())));
+        } else return ResponseEntity.badRequest().body("Esa partida no existe");
+    }
+
+    @PostMapping("/game/getUltimaJugada")
+    public ResponseEntity<?> getUltimaJugada(@RequestBody GetMano request){
+        logger.info("Ultima jugada en la partida " + request.getIdPartida() );
+        if(request.getUsername() == null || request.getIdPartida() == null) return ResponseEntity.badRequest().body("Campos no válidos");
+        if(gameService.existPartida(request.getIdPartida())){
+            Partida p = gameService.getPartida(request.getIdPartida());
+            if(p.playerAlreadyIn(new Jugador(request.getUsername()))){
+                Jugador jugador = p.getJugador(new Jugador(request.getUsername()));
+                logger.info("Se obtiene el jugador " + jugador);
+                simpMessagingTemplate.convertAndSendToUser(jugador.getNombre(), "/msg", new Jugada(p.getUltimaCartaJugada(),p.getJugadores(), p.getTurno().getNombre()));
+                return ResponseEntity.ok(new MessageResponse("Ultima jugada enviada"));
+            } else {
+                return ResponseEntity.badRequest().body("El jugador no está en la partida.");
+            }
+        } else return ResponseEntity.badRequest().body("Esa partida no existe");
+    }
+
+    @PostMapping("/game/getManoJugador")
+    public ResponseEntity<?> getManoJugador(@RequestBody GetMano request){
+        logger.info("Mano del jugador " + request.getUsername() + " en la partida " + request.getIdPartida() );
+        if(request.getUsername() == null || request.getIdPartida() == null) return ResponseEntity.badRequest().body("Campos no válidos");
+        if(gameService.existPartida(request.getIdPartida())){
+            logger.info("Existe la partida");
+            Partida p = gameService.getPartida(request.getIdPartida());
+            if(p.playerAlreadyIn(new Jugador(request.getUsername()))){
+                Jugador jugador = p.getJugador(new Jugador(request.getUsername()));
+                logger.info("Se obtiene el jugador " + jugador);
+                simpMessagingTemplate.convertAndSendToUser(jugador.getNombre(), "/msg", Sender.enviar(jugador.getMano()));
+                return ResponseEntity.ok(new MessageResponse("Mano enviada"));
+            } else {
+                return ResponseEntity.badRequest().body("El jugador no está en la partida.");
+            }
         } else return ResponseEntity.badRequest().body("Esa partida no existe");
     }
 
@@ -165,16 +223,31 @@ public class GameController {
         try{
             logger.info("cambiar mano de " + request.getPlayer1() + " con " + request.getPlayer2() );
 
-            Partida game = gameService.getPartida(roomId);
+            Partida game = gameService.getPartida(request.getGameId());
+            Jugador j1 = new Jugador(request.getPlayer1());
+            Jugador j2 = new Jugador(request.getPlayer2());
+            j1 = game.getJugador(j1);
+            j2 = game.getJugador(j2);
+
+            if(game.playerAlreadyIn(j1) && game.playerAlreadyIn(j2)){
+                List<Carta> mano1 = j1.getCartas();
+                List<Carta> mano2 = j2.getCartas();
+                j1.setMano(mano2);
+                j2.setMano(mano1);
+            } else {
+                return ResponseEntity.badRequest().body("Alguno de los jugadores no pertenece a la partida");
+            }
             
             //Enviar cartas robadas al solicitante
-            Jugador jugador = game.getJugador(new Jugador(username));
-            simpMessagingTemplate.convertAndSendToUser(username, "/msg", gameService.drawCards(roomId, jugador, nCards));
+            logger.info(j1.getMano().toString());
+            logger.info(j2.getMano().toString());
+            simpMessagingTemplate.convertAndSendToUser(j1.getNombre(), "/msg", "mano: "+j1.getMano());
+            simpMessagingTemplate.convertAndSendToUser(j2.getNombre(), "/msg", "mano: "+j2.getMano());
             
-            return Sender.enviar(new Jugada(game.getUltimaCartaJugada(), game.getJugadores(), game.getTurno().getNombre()));
+            return ResponseEntity.ok(new MessageResponse("Se han cambiado las manos"));
         } catch(Exception e){
             logger.warning("Exception" + e.getMessage());
-            return Sender.enviar(e);
+            return ResponseEntity.badRequest().body(Sender.enviar(e));
         }
     }
 
@@ -272,17 +345,19 @@ public class GameController {
     @MessageExceptionHandler()
     public String pasarTurno(@DestinationVariable("roomId") String roomId, @Header("username") String username) {
         try{
-           
+           logger.info("turno pasado");
+
             Partida p = gameService.getPartida(roomId);
+            p.cancelarAlarma();
             if(!p.getTurno().getNombre().equals(username)){
                 simpMessagingTemplate.convertAndSendToUser(username, "/msg", "No es tu turno");
                 return Sender.enviar(new String("ALGUIEN HA INTENTADO JUGAR Y NO ERA SU TURNO"));
             }
-            p.siguienteTurno();           
-
+            p.siguienteTurno();
+            p.startAlarma();
             return Sender.enviar(new Jugada(p.getUltimaCartaJugada(),p.getJugadores(), p.getTurno().getNombre()));
         } catch(Exception e){
-            logger.warning("Exception" + e.getMessage());
+            logger.warning("Exception " + e.getMessage());
             return Sender.enviar(e);
         }
     }
@@ -330,28 +405,95 @@ public class GameController {
         return Sender.enviar(new String(username));
     }
 
-    // @ExceptionHandler(Exception.class)
-    // public ModelAndView handleException(NullPointerException ex)
-    // {
-    //     //Do something additional if required
-    //     ModelAndView modelAndView = new ModelAndView();
-    //     modelAndView.setViewName("error");
-    //     modelAndView.addObject("message", ex.getMessage());
-    //     return modelAndView;
-    // }
+    @PostMapping("/torneo/createTorneo")
+    public ResponseEntity<?> crearTorneo(@RequestBody CrearTorneo request){
+        logger.info("crear un torneo");
+        Torneo t = torneoService.crearTorneo(new Jugador(request.getUsername()), request.getTiempoTurno(), request.getReglas(), gameService);
+        List<String> s = new ArrayList<String>();
+        for(Jugador j : t.getJugadores()){
+            s.add(j.getNombre());
+        }
+        return ResponseEntity.ok(Sender.enviar(new InfoTorneoResponse(t.getIdTorneo(), t.getTiempoTurno(), s, t.getReglas())));
+    }
 
-    /*@PostMapping("/connect/random")
-    public ResponseEntity<Game> connectRandom(@RequestBody Player player) throws GameException{
-        log.info("connect random {}", player);
-        return ResponseEntity.ok(gameService.connectToRandomGame(player));
-    }*/
+    @PostMapping("/torneo/getTorneos")
+    public ResponseEntity<?> getTorneos(){
+        List<InfoTorneoResponse> listaInfoTorneos = new ArrayList<InfoTorneoResponse>();
+        for(Torneo t : torneoService.listaTorneos()) {
+            List<String> s = new ArrayList<String>();
+            for(Jugador j : t.getJugadores()){
+                s.add(j.getNombre());
+            }
+            listaInfoTorneos.add(new InfoTorneoResponse(t.getIdTorneo(), t.getTiempoTurno(), s, t.getReglas()));
+        }
+        return ResponseEntity.ok(Sender.enviar(listaInfoTorneos));
+    }
 
-  /*  @PostMapping("/sow")
-    public ResponseEntity<Partida> sow(@RequestBody Sow sow) throws GameException {
-        logger.info("sow: {}", sow);
-        Partida game = gameService.sow(sow);
+    @PostMapping("/torneo/jugarFinal")
+    public ResponseEntity<?> jugarFinal(@RequestBody JugarFinal request){
+        logger.info("Finalista " + request.getUsername());
+        return ResponseEntity.ok(Sender.enviar(torneoService.jugarFinal(request.getUsername(), request.getTorneoId())));
+    }
 
-        simpMessagingTemplate.convertAndSend("/topic/game-progress/" + game.getId(), game);
-        return ResponseEntity.ok(game);
-    }*/
+    @PostMapping("/torneo/game/isSemifinal")
+    public ResponseEntity<?> isSemifinal(@RequestBody CheckSemifinal request){
+        if(torneoService.existeTorneo(request.getIdTorneo())){
+            boolean isSemifinal = torneoService.isSemifinal(request.getIdPartida(), request.getIdTorneo());
+            return ResponseEntity.ok(Sender.enviar(isSemifinal));
+        } else return ResponseEntity.badRequest().body("Ese torneo no existe");
+    }
+
+    @PostMapping("/torneo/getTorneosActivos")
+    public ResponseEntity<?> getTorneosActivos(@RequestBody GetPartidas request){
+        String s = torneoService.getTorneosUser(request.getUsername());
+        if(s == ""){
+            return ResponseEntity.ok(new MessageResponse("No hay partidas para el usuario"));
+        } else return ResponseEntity.ok(new PartidasResponse(s));
+    }
+
+    @MessageMapping("/connect/torneo/{torneoId}")
+	@SendTo("/topic/connect/torneo/{torneoId}")
+    @MessageExceptionHandler()
+    public String connectTorneo(@DestinationVariable("torneoId") String roomId, @Header("username") String username) {
+        try{
+			logger.info("tournament connect request by " + username);
+			return Sender.enviar(torneoService.connectToTorneo(new Jugador(username), roomId));
+        } catch(Exception e) {
+            logger.warning("Exception" + e.getMessage());
+          	return Sender.enviar(e);
+        }
+    }
+
+    @MessageMapping("/disconnect/torneo/{torneoId}")
+	@SendTo("/topic/disconnect/torneo/{torneoId}")
+    @MessageExceptionHandler()
+    public String disconnectTorneo(@DestinationVariable("torneoId") String roomId, @Header("username") String username) {
+        try{
+			logger.info("tournament connect request by " + username);
+			return Sender.enviar(torneoService.disconnectTorneo(roomId,username));
+        } catch(Exception e) {
+            logger.warning("Exception" + e.getMessage());
+          	return Sender.enviar(e);
+        }
+    }
+
+    @MessageMapping("/begin/torneo/{torneoId}")
+    @MessageExceptionHandler()
+    public void beginTorneo(@DestinationVariable("torneoId") String torneoId, @Header("username") String username) {
+        try{
+            logger.info("begin tournament request by " + username);
+            Torneo torneo = torneoService.beginTorneo(torneoId);
+            List<Partida> partidas_torneo = torneo.getPartidas();
+            List<Jugador> jugadores = torneo.getJugadores();
+            for(int j = 0; j<torneo.getNJugadores(); ++j){
+                logger.info("send to " + jugadores.get(j).getNombre());
+
+                // enviar a cada jugador la partida correspondiente
+                simpMessagingTemplate.convertAndSendToUser(jugadores.get(j).getNombre(), "/msg", partidas_torneo.get(j/3).getId());
+                logger.info(jugadores.get(j).getNombre() + " " + partidas_torneo.get(j/3));
+            }
+        } catch(Exception e) {
+            logger.warning("Exception" + e.getMessage());
+        }
+    }
 }

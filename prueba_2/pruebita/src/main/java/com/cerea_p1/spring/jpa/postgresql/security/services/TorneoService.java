@@ -1,18 +1,13 @@
 package com.cerea_p1.spring.jpa.postgresql.security.services;
 
 import com.cerea_p1.spring.jpa.postgresql.model.game.*;
-import com.cerea_p1.spring.jpa.postgresql.payload.response.Jugada;
 import com.cerea_p1.spring.jpa.postgresql.exception.*;
 import lombok.AllArgsConstructor;
 
-import org.hibernate.mapping.Set;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
-import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-import java.security.KeyStore.Entry;
 import java.util.List;
 import java.util.ArrayList;
 
@@ -22,14 +17,11 @@ public class TorneoService {
 
     private ConcurrentHashMap<String,Torneo> almacen_torneos;
 
-    @Autowired
-    private GameService gameService;
-
     public TorneoService(){
         almacen_torneos = new ConcurrentHashMap<String,Torneo>();
     }
 
-    public Torneo crearTorneo(Jugador jugador, int tTurn, List<Regla> reglas) {
+    public Torneo crearTorneo(Jugador jugador, int tTurn, List<Regla> reglas, GameService gameService) {
         List<Partida> lista_partidas = new ArrayList<Partida>();
         int nJugadores = 3;
 
@@ -38,6 +30,7 @@ public class TorneoService {
         lista_partidas.add(new Partida(nJugadores,tTurn, reglas));
         lista_partidas.add(new Partida(nJugadores,tTurn, reglas));
         lista_partidas.add(new Partida(nJugadores,tTurn, reglas));
+        
         for(Partida p : lista_partidas){
             gameService.addPartida(p);
         }
@@ -87,7 +80,7 @@ public class TorneoService {
         } else throw new BeginGameException("Faltan jugadores.");
     }    
 
-    public List<String> listaTorneos(){
+    public List<String> listaIdTorneos(){
         List<String> lista = new ArrayList<String>();
         for(String s : almacen_torneos.keySet()){
             if(almacen_torneos.get(s).getEstadoTorneo() == EstadoPartidaEnum.NEW){
@@ -95,6 +88,22 @@ public class TorneoService {
             }
         }
         return lista;
+    }
+
+    public List<Torneo> listaTorneos(){
+        List<Torneo> lista = new ArrayList<Torneo>();
+        for(Torneo t : almacen_torneos.values()){
+            lista.add(t);
+        }
+        return lista;
+    }
+
+    public boolean existeTorneo(String torneoId){
+        return almacen_torneos.containsKey(torneoId);
+    }
+
+    public Torneo getTorneo(String torneoId) {
+        return almacen_torneos.get(torneoId);
     }
 
     public String disconnectTorneo(String torneoId, String username){
@@ -128,5 +137,19 @@ public class TorneoService {
         Torneo t = almacen_torneos.get(torneoId);
         Partida p = t.getPartidas().get(3);
         return p.getId();
+    }
+
+    public String getTorneosUser(String user){
+        for(Torneo t : almacen_torneos.values()){
+            if(t.playerAlreadyIn(new Jugador(user))){
+                return t.getIdTorneo();
+            }
+        }
+        return "";
+    }
+
+    public boolean isSemifinal(String idPartida, String idTorneo) {
+        Torneo t = getTorneo(idTorneo);
+        return t.isSemifinal(idPartida);
     }
 }

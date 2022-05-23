@@ -2,7 +2,19 @@ package com.cerea_p1.spring.jpa.postgresql.model.game;
 
 import java.util.*;
 
-public class Partida {
+import com.cerea_p1.spring.jpa.postgresql.payload.request.ServerPasarTurno;
+import com.cerea_p1.spring.jpa.postgresql.utils.Sender;
+
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.io.UnsupportedEncodingException; 
+
+public class Partida  extends TimerTask {
     private int nJugadores;
     private List<Jugador> jugadores;
     private List<Carta> baraja;
@@ -15,6 +27,34 @@ public class Partida {
     private int sentido;
     // true indica que la partida es privada, false indica que la partida es pública
     private boolean partidaPrivada;
+    @Autowired
+    private Timer timer = new Timer();
+    TimerTask task = new TimerTask() {
+        
+        @Override
+        public void run() {
+            System.out.println("HA SONADO LA ALARMA");
+
+            HttpPost post = new HttpPost("https://onep1.herokuapp.com/server/pasarTurno"); 
+
+            try {
+                StringEntity params = new StringEntity(Sender.enviar(new ServerPasarTurno(id,getTurno().getNombre())));
+                System.out.println(params.toString());
+                post.addHeader("content-type", "application/json");
+                post.setEntity(params);
+
+            } catch (UnsupportedEncodingException e) {
+                System.out.println("Excepcion alarma " + e.getMessage());
+            }
+            try (CloseableHttpClient httpClient = HttpClients.createDefault();
+                CloseableHttpResponse response = httpClient.execute(post)) {
+            } catch(Exception e) {
+                System.out.println(e.getMessage());
+            }
+            
+        }
+
+    };
 
     public Partida(boolean tipoPartida) {
         jugadores = new ArrayList<Jugador>();
@@ -23,7 +63,7 @@ public class Partida {
         reglas = new ArrayList<Regla>();
         partidaPrivada = tipoPartida;
         Carta carta = baraja.get(baraja.size()-1);
-        while(carta.getColor() == Color.UNDEFINED){
+        while(carta.getColor() == Color.UNDEFINED || carta.getNumero() == Numero.BLOQUEO || carta.getNumero() == Numero.MAS_DOS){
             Collections.shuffle(baraja);
             carta = baraja.get(baraja.size()-1);
         }
@@ -44,7 +84,7 @@ public class Partida {
         this.estado = EstadoPartidaEnum.NEW;
         partidaPrivada = true;
         Carta carta = baraja.get(baraja.size()-1);
-        while(carta.getColor() == Color.UNDEFINED){
+        while(carta.getColor() == Color.UNDEFINED || carta.getNumero() == Numero.BLOQUEO || carta.getNumero() == Numero.MAS_DOS){
             Collections.shuffle(baraja);
             carta = baraja.get(baraja.size()-1);
         }
@@ -325,5 +365,65 @@ public class Partida {
 
     public void cambioSentido(){
         sentido = - sentido;
+    }
+
+    @Override
+    public void run() {
+        System.out.println("HA SONADO LA ALARMA");
+
+        HttpPost post = new HttpPost("https://onep1.herokuapp.com/server/pasarTurno"); 
+
+        try {
+            StringEntity params = new StringEntity(Sender.enviar(new ServerPasarTurno(id,getTurno().getNombre())));
+            System.out.println(params.toString());
+            post.addHeader("content-type", "application/json");
+            post.setEntity(params);
+        } catch (UnsupportedEncodingException e) {
+            System.out.println("Excepcion alarma " + e.getMessage());
+        }
+
+        try (CloseableHttpClient httpClient = HttpClients.createDefault();
+            CloseableHttpResponse response = httpClient.execute(post)) {
+        } catch(Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
+        
+    public void startAlarma() {
+        timer.cancel();
+        timer = new Timer();
+        task = new TimerTask() {
+		@Override
+		public void run() {
+            
+           HttpPost post = new HttpPost("https://onep1.herokuapp.com/server/pasarTurno"); 
+   
+           try {
+                
+               StringEntity params = new StringEntity(Sender.enviar(new ServerPasarTurno(id,getTurno().getNombre())));
+               System.out.println(params.toString());
+               post.addHeader("content-type", "application/json");
+               post.setEntity(params);
+
+           } catch (UnsupportedEncodingException e) {
+
+               System.out.println("Excepcion alarma " + e.getMessage());
+           }
+   
+           try (CloseableHttpClient httpClient = HttpClients.createDefault();
+               CloseableHttpResponse response = httpClient.execute(post)) {
+             
+           } catch(Exception e) {
+               System.out.println(e.getMessage());
+           }
+		}
+        
+    };
+        timer.schedule(task, (tTurno+2)*1000);
+    }
+
+    public void cancelarAlarma(){
+        timer.cancel();
+        timer.purge();
     }
 }

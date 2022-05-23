@@ -25,7 +25,7 @@ public class WebSocketConfig extends AbstractSecurityWebSocketMessageBrokerConfi
         messages
                 .simpTypeMatchers(SimpMessageType.CONNECT,
                         SimpMessageType.DISCONNECT, SimpMessageType.OTHER, SimpMessageType.SUBSCRIBE, SimpMessageType.MESSAGE, SimpMessageType.UNSUBSCRIBE).permitAll()
-                .anyMessage().authenticated();
+                .anyMessage().permitAll();
     }
  
     @Override
@@ -36,10 +36,7 @@ public class WebSocketConfig extends AbstractSecurityWebSocketMessageBrokerConfi
  
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-     //   registry.addEndpoint("/broadcast");  // it is OK to leave it here
-        // registry.addEndpoint("/broadcast").withSockJS();
         // custom heartbeat, every 60 sec
         registry.addEndpoint("/onep1-game").setAllowedOriginPatterns("*").withSockJS();
-        //registry.addEndpoint("/onep1-game").withSockJS();
     }
 }

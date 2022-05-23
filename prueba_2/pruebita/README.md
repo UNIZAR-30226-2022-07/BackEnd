@@ -380,14 +380,16 @@ Partidas de un usuario
   - JSON:
 
           {
-            "playerName": <nombre_del_usuario>
+            "username": <nombre_del_usuario>
           }
 
   - Devuelve: 
     - Si va bien: codigo 200 
      
           
-            <codigo de partida>
+          {
+            "partidas": <codigo_partida>
+          }
           
       
     - Si va mal: codigo 4**, y por qué falla
@@ -421,7 +423,8 @@ Información de la partida
                 [CERO_SWITCH, CRAZY_7, PROGRESSIVE_DRAW, CHAOS_DRAW, BLOCK_DRAW, REPEAT_DRAW]
               }
               ...
-            ]
+            ],
+            "estado": <estado> (NEW, IN_PROGRESS, FINISHED)
           }
       
     - Si va mal: codigo 4**, y por qué falla
@@ -572,20 +575,20 @@ Crear un torneo
     - Si va bien: codigo 200 
     
 	       {
-		  "idTorneo": <id_torneo>,
-		  "tiempoTurno": <tiempo de turno>,
-		  "jugadores": [
-		    <nombre_jugador1>,
-		    <nombre_jugador2>,
-		    ...
+		      "idTorneo": <id_torneo>,
+          "tiempoTurno": <tiempo de turno>,
+          "jugadores": [
+            <nombre_jugador1>,
+            <nombre_jugador2>,
+            ...
 
-		  ],
-		  "reglas": [
-		    <regla1>,
-		    <regla2>,
-		    ...
-		  ]
-		}
+          ],
+          "reglas": [
+            <regla1>,
+            <regla2>,
+            ...
+          ]
+        }
           
       
     - Si va mal: codigo 4**, y por qué falla
@@ -598,10 +601,23 @@ Obtener torneos disponibles
 
   - Devuelve: 
     - Si va bien: codigo 200 
+
         [
-          <id_torneo1>,
-          <id_torneo2>,
-          ...
+          {
+            "idTorneo": <id_torneo>,
+            "tiempoTurno": <tiempo de turno>,
+            "jugadores": [
+              <nombre_jugador1>,
+              <nombre_jugador2>,
+              ...
+
+            ],
+            "reglas": [
+              <regla1>,
+              <regla2>,
+              ...
+            ]
+          }
         ]
           
       
@@ -625,7 +641,137 @@ Jugar la final de un toneo
       
     - Si va mal: codigo 4**, y por qué falla
 
-    
+Cambiar las manos con otro jugador
+
+  - Petición POST a : https://onep1.herokuapp.com/game/cambiarManos
+
+  - JSON:
+   
+          {
+            "gameId" : <game_id>,
+            "player1" : <username1>,
+            "player2" : <username2>
+          }
+
+  - Devuelve: 
+    - Si va bien: codigo 200 
+
+        {
+          "message" : "Se han cambiado las manos"
+        }
+
+      - Envia por el canal /user/{username}/msg la nueva mano asignada en formato:
+		
+	    mano: [NUEVE ROJO, BLOQUEO AZUL, MAS_CUATRO UNDEFINED]
+
+          
+      
+    - Si va mal: codigo 4**, y por qué falla
+
+
+Saber si una partida es una semifinal de un torneo o no
+  - Petición POST a : https://onep1.herokuapp.com/torneo/game/isSemifinal
+
+  - JSON:
+   
+          {
+            "idPartida" : <game_id>,
+            "idTorneo" : <username1>,
+          }
+
+  - Devuelve: 
+    - Si va bien: codigo 200 
+
+        {
+          "true" o "false"
+        }     
+      
+    - Si va mal: codigo 4**, y por qué falla
+
+Obtener la mano de un jugador
+
+  - Petición POST a : https://onep1.herokuapp.com/game/getManoJugador
+
+  - JSON:
+   
+          {
+            "username" : <nombre_del_usuario>,
+            "idPartida" : <id_partida>
+          }
+
+  - Devuelve: 
+    - Si va bien: codigo 200 
+
+        {
+          "message" : "Mano enviada"
+        }
+
+      - Envia por el canal /user/{username}/msg la mano del jugador
+          
+      
+    - Si va mal: codigo 4**, y por qué falla
+
+Obtener ultima jugada de una partida
+
+  - Petición POST a : https://onep1.herokuapp.com/game/getManoJugador
+
+  - JSON:
+   
+          {
+            "username" : <nombre_del_usuario>,
+            "idPartida" : <id_partida>
+          }
+
+  - Devuelve: 
+    - Si va bien: codigo 200 
+
+        {
+          "message" : "Ultima jugada enviada"
+        }
+
+      - Envia por el canal /user/{username}/msg la ultima jugada con el formato:
+
+        {
+            "carta": {
+            "num" : [CERO, UNO, DOS, TRES, CUATRO, CINCO, SEIS, SIETE, OCHO, NUEVE, BLOQUEO, MAS_DOS, CAMBIO_SENTIDO, CAMBIO_COLOR, MAS_CUATRO],
+            "col" : [ROJO, AMARILLO, AZUL, VERDE, UNDEFINED]
+            },
+            "jugadores": [
+            {
+              "username": "<nombre>",
+              "numeroCartas": <numero_cartas>
+            }, 
+            {
+              "username": "<nombre>",
+              "numeroCartas": <numero_cartas>
+            },
+            ...
+            ],
+            "turno":<username>
+          }
+      
+    - Si va mal: codigo 4**, y por qué falla
+
+Torneos de un usuario
+
+  - Peticion POST a : https://onep1.herokuapp.com/torneo/getTorneosActivos
+
+  - JSON:
+
+          {
+            "username": <nombre_del_usuario>
+          }
+
+  - Devuelve: 
+    - Si va bien: codigo 200 
+     
+          
+          {
+            "partidas": <codigo_partida>
+          }
+          
+      
+    - Si va mal: codigo 4**, y por qué falla
 
 ## Websockets
 
@@ -696,7 +842,7 @@ Enviar un mensaje para robar n cartas game/card/draw/{roomId}
     - Body :
  
 			{
-			  "nCards" : <numero_cartas_a_robar>
+			  <numero_cartas_a_robar>
 			}
 
   - Devuelve:
