@@ -1,31 +1,49 @@
 package com.cerea_p1.spring.jpa.postgresql.model.game;
 
-import com.cerea_p1.spring.jpa.postgresql.model.game.Numero;
-import com.cerea_p1.spring.jpa.postgresql.model.game.Color;
-
 public class Carta {
-    Numero num;
-    Color col;
+    Numero numero;
+    Color color;
 
     public Carta(Numero numero, Color color){
-        num = numero;
-        col = color;
+        this.numero = numero;
+        this.color = color;
+    }
+
+    public Carta(String numero, String color){
+        this.numero = Numero.valueOf(numero);
+        this.color = Color.valueOf(color);
     }
 
     public void setNumero(Numero numero){
-        num = numero;
+        this.numero = numero;
     }
 
     public Numero getNumero(){
-        return num;
+        return numero;
     }
 
     public void setColor(Color color){
-        col = color;
+        this.color = color;
     }
 
     public Color getColor(){
-        return col;
+        return color;
+    }
+
+    @Override
+    public String toString(){
+        return numero + " " + color;
+    }
+
+    @Override
+    public boolean equals(Object o){
+        if(o instanceof Carta){
+            Carta c = (Carta)o;
+            if(((c.getNumero() == Numero.MAS_CUATRO || c.getNumero() == Numero.CAMBIO_COLOR) && c.getNumero() == numero)|| (c.getColor() == this.color && c.getNumero() == this.numero)) return true;
+            else return false;
+        } else {
+            return false;
+        }
     }
     
 }

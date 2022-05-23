@@ -1,6 +1,5 @@
 package com.cerea_p1.spring.jpa.postgresql.model.game;
 
-import com.cerea_p1.spring.jpa.postgresql.model.game.Carta;
 import java.util.*;
 
 public class Jugador {
@@ -28,6 +27,10 @@ public class Jugador {
         return this.mano;
     }
 
+    public boolean tieneCarta(Carta c) {
+        return mano.contains(c);
+    }
+
     public boolean deleteCarta(Carta c){
         if (mano.contains(c)){
             mano.remove(c);
@@ -42,5 +45,18 @@ public class Jugador {
         }
         Jugador j = (Jugador)o;
         return Objects.equals(j.getNombre(), this.nombre);
+    }
+
+    public List<Carta> getMano() {
+        return mano;
+    }
+
+    public void setMano(List<Carta> mano) {
+        this.mano = mano;
+    }
+
+    @Override
+    public String toString(){
+        return nombre + " " + mano;
     }
 }

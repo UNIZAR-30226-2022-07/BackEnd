@@ -1,26 +1,97 @@
 package com.cerea_p1.spring.jpa.postgresql.model.game;
 
 import java.util.*;
-import com.cerea_p1.spring.jpa.postgresql.model.game.Jugador;
-import com.cerea_p1.spring.jpa.postgresql.model.game.Color;
-import com.cerea_p1.spring.jpa.postgresql.model.game.Numero;
 
-public class Partida {
+import com.cerea_p1.spring.jpa.postgresql.payload.request.ServerPasarTurno;
+import com.cerea_p1.spring.jpa.postgresql.utils.Sender;
+
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.io.UnsupportedEncodingException; 
+
+public class Partida  extends TimerTask {
     private int nJugadores;
     private List<Jugador> jugadores;
     private List<Carta> baraja;
     private List<Carta> descartes;
+    private List<Regla> reglas;
     private EstadoPartidaEnum estado;
     private String id;
     private int tTurno;
+    private int index;
+    private int sentido;
     // true indica que la partida es privada, false indica que la partida es pública
     private boolean partidaPrivada;
+    @Autowired
+    private Timer timer = new Timer();
+    TimerTask task = new TimerTask() {
+        
+        @Override
+        public void run() {
+            System.out.println("HA SONADO LA ALARMA");
+
+            HttpPost post = new HttpPost("https://onep1.herokuapp.com/server/pasarTurno"); 
+
+            try {
+                StringEntity params = new StringEntity(Sender.enviar(new ServerPasarTurno(id,getTurno().getNombre())));
+                System.out.println(params.toString());
+                post.addHeader("content-type", "application/json");
+                post.setEntity(params);
+
+            } catch (UnsupportedEncodingException e) {
+                System.out.println("Excepcion alarma " + e.getMessage());
+            }
+            try (CloseableHttpClient httpClient = HttpClients.createDefault();
+                CloseableHttpResponse response = httpClient.execute(post)) {
+            } catch(Exception e) {
+                System.out.println(e.getMessage());
+            }
+            
+        }
+
+    };
 
     public Partida(boolean tipoPartida) {
         jugadores = new ArrayList<Jugador>();
         baraja = barajaInicial();
         descartes = new ArrayList<Carta>();
+        reglas = new ArrayList<Regla>();
         partidaPrivada = tipoPartida;
+        Carta carta = baraja.get(baraja.size()-1);
+        while(carta.getColor() == Color.UNDEFINED || carta.getNumero() == Numero.BLOQUEO || carta.getNumero() == Numero.MAS_DOS){
+            Collections.shuffle(baraja);
+            carta = baraja.get(baraja.size()-1);
+        }
+        descartes.add(baraja.get(baraja.size()-1));
+        baraja.remove(baraja.size()-1);
+        index = 0;
+        sentido = 1;
+    }
+
+    public Partida(int numJugadores, int tTurno, List<Regla> reglas){
+        this.id = UUID.randomUUID().toString();
+        jugadores = new ArrayList<Jugador>();
+        baraja = barajaInicial();
+        descartes = new ArrayList<Carta>();
+        this.reglas = reglas;
+        this.nJugadores = numJugadores;
+        this.tTurno = tTurno;
+        this.estado = EstadoPartidaEnum.NEW;
+        partidaPrivada = true;
+        Carta carta = baraja.get(baraja.size()-1);
+        while(carta.getColor() == Color.UNDEFINED || carta.getNumero() == Numero.BLOQUEO || carta.getNumero() == Numero.MAS_DOS){
+            Collections.shuffle(baraja);
+            carta = baraja.get(baraja.size()-1);
+        }
+        descartes.add(baraja.get(baraja.size()-1));
+        baraja.remove(baraja.size()-1);
+        index = 0;
+        sentido = 1;
     }
 
     public void setTipo(boolean tipo){
@@ -148,15 +219,15 @@ public class Partida {
         baraja.add(new Carta(Numero.BLOQUEO,Color.VERDE));
         baraja.add(new Carta(Numero.BLOQUEO,Color.VERDE));
         
-        baraja.add(new Carta(Numero.UNDEFINED,Color.CAMBIO_COLOR));
-        baraja.add(new Carta(Numero.UNDEFINED,Color.CAMBIO_COLOR));
-        baraja.add(new Carta(Numero.UNDEFINED,Color.CAMBIO_COLOR));
-        baraja.add(new Carta(Numero.UNDEFINED,Color.CAMBIO_COLOR));
+        baraja.add(new Carta(Numero.CAMBIO_COLOR,Color.UNDEFINED));
+        baraja.add(new Carta(Numero.CAMBIO_COLOR,Color.UNDEFINED));
+        baraja.add(new Carta(Numero.CAMBIO_COLOR,Color.UNDEFINED));
+        baraja.add(new Carta(Numero.CAMBIO_COLOR,Color.UNDEFINED));
 
-        baraja.add(new Carta(Numero.MAS_CUATRO,Color.CAMBIO_COLOR));
-        baraja.add(new Carta(Numero.MAS_CUATRO,Color.CAMBIO_COLOR));
-        baraja.add(new Carta(Numero.MAS_CUATRO,Color.CAMBIO_COLOR));
-        baraja.add(new Carta(Numero.MAS_CUATRO,Color.CAMBIO_COLOR));
+        baraja.add(new Carta(Numero.MAS_CUATRO,Color.UNDEFINED));
+        baraja.add(new Carta(Numero.MAS_CUATRO,Color.UNDEFINED));
+        baraja.add(new Carta(Numero.MAS_CUATRO,Color.UNDEFINED));
+        baraja.add(new Carta(Numero.MAS_CUATRO,Color.UNDEFINED));
 
         //barajar
         Collections.shuffle(baraja);
@@ -177,32 +248,50 @@ public class Partida {
     }
 
     public void repartirManos() {
-        for(int i=0; i<7; ++i) {
+        for(int i=0; i<7; i++) {
             for (Jugador j : jugadores) {
-                j.addCarta(baraja.get(0));
-                baraja.remove(0);
+                j.addCarta(baraja.get(baraja.size()-1));
+                baraja.remove(baraja.size()-1);
             }
         }
+    }
+
+    public Carta getUltimaCartaJugada(){
+        return descartes.get(descartes.size()-1);
     }
 
     public void jugarCarta(Carta c, String nombreJugador) {
         descartes.add(c);
         for (Jugador j : jugadores) {
-            if (j.getNombre().equals(nombreJugador))
+            if (j.getNombre().equals(nombreJugador)){
+                if(c.numero.equals(Numero.CAMBIO_SENTIDO)){
+                    cambioSentido();
+                }
                 j.deleteCarta(c);
+            }
         }
     }
 
+    public void siguienteTurno(){
+        index = (index+sentido)%nJugadores;
+        if(index <  0){
+            index = (index + nJugadores) % nJugadores;
+        }
+    }
+
+    public Jugador getTurno(){
+        return jugadores.get(index);
+    }
+
     public List<Carta> robarCartas(String nombreJugador, int n) {
-        // Frontend espera una lista pequeña en lugar de la mano entera.
         List<Carta> robadas = new ArrayList<Carta>();
 
         if(n > baraja.size())
             barajarDescartes();
 
         for(int i=0; i<n; ++i) {
-            robadas.add(baraja.get(0));
-            baraja.remove(0);
+            robadas.add(baraja.get(baraja.size()-1));
+            baraja.remove(baraja.size()-1);
         }
 
         return robadas;
@@ -214,6 +303,13 @@ public class Partida {
 
     public List<Jugador> getJugadores(){
         return jugadores;
+    }
+
+    public Jugador getJugador(Jugador j){
+        for(Jugador k : jugadores){
+            if(k.equals(j)) return k;
+        }
+        return null;
     }
 
     public boolean removePlayer(Jugador j){
@@ -257,5 +353,77 @@ public class Partida {
 
     public void setNJugadores(int nJugadores) {
         this.nJugadores = nJugadores;
+    }
+
+    public List<Regla> getReglas() {
+        return reglas;
+    }
+
+    public void setReglas(List<Regla> reglas) {
+        this.reglas = reglas;
+    }
+
+    public void cambioSentido(){
+        sentido = - sentido;
+    }
+
+    @Override
+    public void run() {
+        System.out.println("HA SONADO LA ALARMA");
+
+        HttpPost post = new HttpPost("https://onep1.herokuapp.com/server/pasarTurno"); 
+
+        try {
+            StringEntity params = new StringEntity(Sender.enviar(new ServerPasarTurno(id,getTurno().getNombre())));
+            System.out.println(params.toString());
+            post.addHeader("content-type", "application/json");
+            post.setEntity(params);
+        } catch (UnsupportedEncodingException e) {
+            System.out.println("Excepcion alarma " + e.getMessage());
+        }
+
+        try (CloseableHttpClient httpClient = HttpClients.createDefault();
+            CloseableHttpResponse response = httpClient.execute(post)) {
+        } catch(Exception e) {
+            System.out.println(e.getMessage());
+        }
+    }
+        
+    public void startAlarma() {
+        timer.cancel();
+        timer = new Timer();
+        task = new TimerTask() {
+		@Override
+		public void run() {
+            
+           HttpPost post = new HttpPost("https://onep1.herokuapp.com/server/pasarTurno"); 
+   
+           try {
+                
+               StringEntity params = new StringEntity(Sender.enviar(new ServerPasarTurno(id,getTurno().getNombre())));
+               System.out.println(params.toString());
+               post.addHeader("content-type", "application/json");
+               post.setEntity(params);
+
+           } catch (UnsupportedEncodingException e) {
+
+               System.out.println("Excepcion alarma " + e.getMessage());
+           }
+   
+           try (CloseableHttpClient httpClient = HttpClients.createDefault();
+               CloseableHttpResponse response = httpClient.execute(post)) {
+             
+           } catch(Exception e) {
+               System.out.println(e.getMessage());
+           }
+		}
+        
+    };
+        timer.schedule(task, (tTurno+2)*1000);
+    }
+
+    public void cancelarAlarma(){
+        timer.cancel();
+        timer.purge();
     }
 }

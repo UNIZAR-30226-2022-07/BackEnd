@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -28,6 +29,7 @@ import java.util.logging.*;
 
 
 @RestController
+@CrossOrigin(allowCredentials = "true", origins = {"http://localhost:4200/","https://one-fweb.herokuapp.com"})
 @RequestMapping("/friends")
 public class FriendController {
     @Autowired
@@ -54,7 +56,7 @@ public class FriendController {
 				opUser = userRepository.findByUsername(addfriendRequest.getFriendname());
 				if(opUser.isPresent()){
 					Usuario user2 = opUser.get();
-					if (!user.getInvitacion().contains(user2) && !user.getAmigos().contains(user2) && !user.getInvitacionesEnviadas().contains(user2)){
+					if (!user.getInvitacionesRecibidas().contains(user2) && !user.getAmigos().contains(user2) && !user.getInvitacionesEnviadas().contains(user2)){
 						user2.addInvitacion(user);
 						userRepository.save(user2);
 						return ResponseEntity.ok(new MessageResponse("Petición de amistad enviada a " + user2.getUsername()));
@@ -68,18 +70,16 @@ public class FriendController {
 	public ResponseEntity<?> getInvitacionesAmistad(@RequestBody GetFriendRequest getfriendRequest) {
 		logger.info("user1=" + getfriendRequest.getUsername() );
 		if ( (!userRepository.existsByUsername(getfriendRequest.getUsername())) ) {
-			return ResponseEntity
-					.badRequest()
-					.body(new MessageResponse("Error: No se pudo encontrar el usuario"));
+			return ResponseEntity.badRequest().body(new MessageResponse("Error: No se pudo encontrar el usuario"));
 		
 		}else {
 			logger.info("Restricciones cumplidas");
 			Optional<Usuario> opUser = userRepository.findByUsername(getfriendRequest.getUsername());
 			if(opUser.isPresent()){
 				Usuario user = opUser.get();
-				List<Usuario> inv = user.getInvitacion();
+				List<Usuario> inv = user.getInvitacionesRecibidas();
 				logger.info("Se obtienen las peticiones de amistad" + inv);
-				return ResponseEntity.ok(Sender.enviar(friendsToString(inv)));
+				return ResponseEntity.ok(new MessageResponse(Sender.enviar(friendsToString(inv))));
 			} else return ResponseEntity.badRequest().body(new MessageResponse("Error: No se pueden recuperar las peticiones de amistad."));
 		}
 	}
@@ -97,7 +97,7 @@ public class FriendController {
 				opUser = userRepository.findByUsername(acceptfriendRequest.getFriendname());
 				if(opUser.isPresent()){
 					Usuario user2 = opUser.get();
-					if (user.getInvitacion().contains(user2)){
+					if (user.getInvitacionesRecibidas().contains(user2)){
 						user.removeInvitacion(user2);
 						user.addAmigo(user2);
 						user2.addAmigo(user);
@@ -126,7 +126,8 @@ public class FriendController {
 				Usuario user = opUser.get();
 				List<Usuario> inv = user.getAmigos();
 				logger.info("Se obtienen los amigos amistad" + inv);
-				return ResponseEntity.ok(Sender.enviar(friendsToString(inv)));
+				logger.info(Sender.enviar(friendsToString(inv)));
+				return ResponseEntity.ok(new MessageResponse(Sender.enviar(friendsToString(inv))));
 			} else return ResponseEntity.badRequest().body(new MessageResponse("Error: No se pueden recuperar los amigos."));
 		}
 	}
@@ -144,7 +145,7 @@ public class FriendController {
 				opUser = userRepository.findByUsername(acceptfriendRequest.getFriendname());
 				if(opUser.isPresent()){
 					Usuario user2 = opUser.get();
-					if (user.getInvitacion().contains(user2)){
+					if (user.getInvitacionesRecibidas().contains(user2)){
 						user.removeInvitacion(user2);
 						userRepository.save(user);
 						return ResponseEntity.ok(new MessageResponse("Petición de amistad cancelada: " + user2.getUsername()));

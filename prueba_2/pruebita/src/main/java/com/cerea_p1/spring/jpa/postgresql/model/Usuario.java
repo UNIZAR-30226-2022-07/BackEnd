@@ -2,6 +2,7 @@ package com.cerea_p1.spring.jpa.postgresql.model;
 
 import javax.persistence.*;
 import javax.validation.constraints.*;
+
 import java.util.*;
 import javax.persistence.CascadeType;
 
@@ -13,37 +14,35 @@ import javax.persistence.CascadeType;
             })
 public class Usuario {
 
+    @Id
     @Pattern(regexp = ".+[@].+[\\.].+")
     @Column(name = "correo_electronico", nullable = false, length = 255)
     private String email;
 
-    @Id
-    @Column(name = "nombre_de_usuario", nullable = false, length = 255)
+    
+    @Column(name = "nombre_de_usuario", nullable = false, length = 255, unique = true)
+    @Size(min = 4)
     private String username;
     
     @NotNull
     @Column(name="contrasena", nullable = false, length = 255)
     private String password;
 
-
-   // @OneToMany(mappedBy = "receptor", cascade=CascadeType.PERSIST)
     @JoinTable(name = "invitacion", joinColumns = {
-        @JoinColumn(name = "receptor", referencedColumnName = "nombre_de_usuario", nullable = false)}, inverseJoinColumns = {
-        @JoinColumn(name = "emisor", referencedColumnName = "nombre_de_usuario", nullable = false)})
-        @ManyToMany(cascade = CascadeType.PERSIST)
-    public List<Usuario> invitaciones;
+        @JoinColumn(name = "receptor", referencedColumnName = "correo_electronico", nullable = false)}, inverseJoinColumns = {
+        @JoinColumn(name = "emisor", referencedColumnName = "correo_electronico", nullable = false)})
+        @ManyToMany(cascade = {CascadeType.PERSIST})
+    public List<Usuario> invitacionesRecibidas;
 
-  //  @OneToMany(mappedBy = "emisor", cascade=CascadeType.PERSIST)
-    @ManyToMany(mappedBy = "invitaciones")
+    @ManyToMany(mappedBy = "invitacionesRecibidas")
     public List<Usuario> invitacionesEnviadas;
 
     @JoinTable(name = "amigo", joinColumns = {
-        @JoinColumn(name = "usuario2", referencedColumnName = "nombre_de_usuario", nullable = false)}, inverseJoinColumns = {
-        @JoinColumn(name = "usuario1", referencedColumnName = "nombre_de_usuario", nullable = false)})
-        @ManyToMany(cascade = CascadeType.PERSIST)
+        @JoinColumn(name = "usuario2", referencedColumnName = "correo_electronico", nullable = false)}, inverseJoinColumns = {
+        @JoinColumn(name = "usuario1", referencedColumnName = "correo_electronico", nullable = false)})
+        @ManyToMany(cascade = {CascadeType.PERSIST})
     public List<Usuario> amigos;
 
-  //  @OneToMany(mappedBy = "emisor", cascade=CascadeType.PERSIST)
     @ManyToMany(mappedBy = "amigos")
     public List<Usuario> amigosInv;
 
@@ -56,16 +55,27 @@ public class Usuario {
     @Column(name="puntos", nullable = false)
     private int puntos;
 
+    @Column(name = "reset_password_token")
+    private String resetPasswordToken;
+
+    @Column(name = "registro_token")
+    private String registroToken;
+
+    @Column(name = "activa")
+    private boolean activa;
+
     public Usuario(String username, String email, String password, String pais) {
         this.username = username;
         this.email = email;
         this.password = password;
         this.pais = pais;
         this.puntos = 0;
+        resetPasswordToken = null;
+        registroToken = null;
 
         amigos = new ArrayList<Usuario>();
         amigosInv = new ArrayList<Usuario>();
-        invitaciones = new ArrayList<Usuario>();
+        invitacionesRecibidas = new ArrayList<Usuario>();
         invitacionesEnviadas = new ArrayList<Usuario>();
     }
 
@@ -76,9 +86,11 @@ public class Usuario {
         pais = null;
         puntos = 0;
         amigos = null;
+        resetPasswordToken = null;
+        registroToken = null;
 
         amigosInv = null;
-        invitaciones = null;
+        invitacionesRecibidas = null;
         invitacionesEnviadas = null;
     }
 
@@ -154,20 +166,20 @@ public class Usuario {
         this.amigosInv.remove(amigo);
     }
 
-    public List<Usuario> getInvitacion(){
-        return this.invitaciones;
+    public List<Usuario> getInvitacionesRecibidas(){
+        return this.invitacionesRecibidas;
     }
 
     public void setInvitacion(List<Usuario> inv){
-        invitaciones = inv;
+        invitacionesRecibidas = inv;
     }
 
     public void addInvitacion(Usuario inv){
-        this.invitaciones.add(inv);
+        this.invitacionesRecibidas.add(inv);
     }
 
     public void removeInvitacion(Usuario inv){
-        this.invitaciones.remove(inv);
+        this.invitacionesRecibidas.remove(inv);
     }
 
     public List<Usuario> getInvitacionesEnviadas(){
@@ -184,6 +196,40 @@ public class Usuario {
 
     public void removeInvitacionesEnviadas(Usuario inv){
         this.invitacionesEnviadas.remove(inv);
+    }
+
+    public String getResetPasswordToken(){
+        return resetPasswordToken;
+    }
+
+    public void setResetPasswordToken(String token){
+        resetPasswordToken = token;
+    }
+
+    public String getRegistroToken(){
+        return registroToken;
+    }
+
+    public void setRegistroToken(String token){
+        registroToken = token;
+    }
+
+    public boolean getActiva(){
+        return activa;
+    }
+
+    public void setActiva(){
+        activa = true;
+    }
+
+    @PreRemove
+    public void removeAmigos(){
+        for(Usuario u : amigos){
+            u.removeAmigo(this);
+        }
+        for(Usuario u : invitacionesEnviadas){
+            u.removeInvitacion(this);
+        }
     }
     
     @Override

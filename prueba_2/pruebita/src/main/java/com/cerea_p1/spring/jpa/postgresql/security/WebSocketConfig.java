@@ -24,22 +24,19 @@ public class WebSocketConfig extends AbstractSecurityWebSocketMessageBrokerConfi
     protected void configureInbound(MessageSecurityMetadataSourceRegistry messages) {
         messages
                 .simpTypeMatchers(SimpMessageType.CONNECT,
-                        SimpMessageType.DISCONNECT, SimpMessageType.OTHER, SimpMessageType.SUBSCRIBE, SimpMessageType.MESSAGE).permitAll()
-                .anyMessage().authenticated();
+                        SimpMessageType.DISCONNECT, SimpMessageType.OTHER, SimpMessageType.SUBSCRIBE, SimpMessageType.MESSAGE, SimpMessageType.UNSUBSCRIBE).permitAll()
+                .anyMessage().permitAll();
     }
  
     @Override
     public void configureMessageBroker(MessageBrokerRegistry config) {
-        config.enableSimpleBroker("/topic");
+        config.enableSimpleBroker("/topic", "/user");
         config.setApplicationDestinationPrefixes("/game");
     }
  
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
-     //   registry.addEndpoint("/broadcast");  // it is OK to leave it here
-        // registry.addEndpoint("/broadcast").withSockJS();
         // custom heartbeat, every 60 sec
         registry.addEndpoint("/onep1-game").setAllowedOriginPatterns("*").withSockJS();
-        //registry.addEndpoint("/onep1-game").withSockJS();
     }
 }
